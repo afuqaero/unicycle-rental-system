@@ -1,9 +1,9 @@
 <?php
 $host = "localhost";
-$port = 3307;   
-$db   = "bike_rental";
-$user = "root";        
-$pass = "";          
+$port = 3307;
+$db = "bike_rental_test";
+$user = "root";
+$pass = "";
 
 try {
     $pdo = new PDO(
