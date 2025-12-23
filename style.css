@@ -1,0 +1,438 @@
+/* =========================
+   GLOBAL
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+:root{
+  --blue: #004EBA;
+  --blue-light: #6091D4;
+  --text: #161616;
+  --bg: #FFFFFF;
+  --muted: #F5F7FA;
+  --panel: #F7F9FC;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* =========================
+   SIDEBAR (works for both .sidebar a and .menu a)
+========================= */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--blue);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--blue-light);
+}
+
+.menu { flex: 1; }
+
+.sidebar a,
+.menu a {
+  display: block;
+  padding: 15px 20px;
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.sidebar a:hover,
+.menu a:hover,
+.sidebar a.active,
+.menu a.active {
+  background: var(--blue-light);
+}
+
+.logout {
+  margin-top: auto;
+  padding: 15px 20px;
+  border-top: 1px solid var(--blue-light);
+}
+
+/* =========================
+   MAIN
+========================= */
+.main {
+  flex: 1;
+  padding: 30px;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+/* =========================
+   HEADERS
+========================= */
+.header h1, h1 {
+  font-size: 26px;
+  margin-bottom: 5px;
+}
+
+.header p,
+p.sub {
+  color: var(--blue-light);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button,
+.view-btn {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button:hover,
+.view-btn:hover {
+  background: var(--blue-light);
+}
+
+button:disabled {
+  background: var(--blue-light);
+  cursor: not-allowed;
+}
+
+.bike-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* pushes button to bottom */
+    border: 1px solid var(--blue-light);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg);
+    min-height: 250px; /* optional, make cards equal height */
+}
+
+
+.bike-card .button-wrapper {
+    margin-top: 20px;   /* space from text above */
+    text-align: center;  /* center button horizontally */
+}
+
+/* Tighten spacing inside bike cards */
+.bike-card h3 {
+    margin-bottom: 4px;   /* less space below heading */
+    line-height: 1.1;     /* tighter heading */
+}
+
+.bike-card p {
+    margin: 0;            /* remove extra margin between paragraphs */
+    line-height: 1.2;     /* tighter paragraph lines */
+}
+
+/* Add spacing only above the button */
+.bike-card .view-btn {
+    margin-top: 10px;     /* space between text and button only */
+    width: 100%;          /* full width of card */
+    padding: 12px 0;      /* taller button */
+    border-radius: 8px;
+    font-size: 16px;
+    display: inline-block;
+    text-decoration: none;
+}
+
+
+
+
+
+
+
+/* =========================
+   DASHBOARD STATS + GENERAL CARDS
+========================= */
+.stats,
+.summary {
+  display: grid;
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.stats { grid-template-columns: repeat(3, 1fr); }
+.summary { grid-template-columns: repeat(3, 1fr); }
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card h3 { font-size: 16px; margin-bottom: 10px; }
+.card span { font-size: 28px; font-weight: bold; }
+
+.emoji {
+  font-size: 50px;
+  line-height: 1;
+}
+
+/* =========================
+   ACTIVE RENTAL BLOCKS
+========================= */
+.active-rental {
+  background: var(--bg);
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.active-rental p { margin-top: 6px; }
+
+.section-title {
+  margin: 30px 0 10px;
+  font-weight: 600;
+}
+
+/* rental-summary special left border */
+.active-rental.border-left {
+  border-left: 6px solid var(--blue);
+}
+
+/* =========================
+   ACTION CARDS (dashboard)
+========================= */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.action-card {
+    padding: 25px;
+    border-radius: 12px;
+    color: #fff;
+    text-decoration: none; /* <-- remove underline */
+    display: flex;
+    flex-direction: column;
+}
+
+
+.action-card.blue { background: var(--blue); }
+.action-card.light { background: var(--blue-light); }
+
+.action-card h3 { margin-bottom: 10px; }
+
+/* =========================
+   AVAILABLE BIKES FILTERS
+========================= */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.filters button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--blue-light);
+}
+
+.filters button.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+/* =========================
+   BIKE GRID + CARD
+========================= */
+.bikes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.bike-card {
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--bg);
+}
+
+.bike-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: inline-block;
+  height: fit-content;
+}
+
+.available { background: #DFF5E3; color: var(--text); }
+.maintenance { background: #FFF3C4; color: var(--text); }
+.pending { background: #FFE8C7; color: var(--text); }
+.rented { background: #FFDADA; color: var(--text); }
+
+.bike-card button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* =========================
+   TABLE (rental history)
+========================= */
+.table-container {
+  margin-top: 20px;
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+}
+
+th { background: var(--muted); }
+
+.badge-ok {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #DFF5E3;
+}
+
+/* =========================
+   COMPLAINTS
+========================= */
+.complaint-card {
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.complaint-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.message {
+  background: var(--panel);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+/* =========================
+   MODAL
+========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal.active { display: flex; }
+
+.modal-box {
+  background: var(--bg);
+  width: 100%;
+  max-width: 450px;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.modal-box h2 { margin-bottom: 20px; }
+
+.form-group { margin-bottom: 15px; }
+
+label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+select, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--blue-light);
+}
+
+textarea {
+  resize: none;
+  height: 100px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel {
+  background: transparent;
+  border: 1px solid var(--blue-light);
+  color: var(--text);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1024px) {
+  .bikes { grid-template-columns: repeat(2, 1fr); }
+  .stats, .summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 720px) {
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+  .main {
+    height: auto;
+    overflow: visible;
+  }
+  .bikes { grid-template-columns: 1fr; }
+  .actions { grid-template-columns: 1fr; }
+  .stats, .summary { grid-template-columns: 1fr; }
+  .active-rental { flex-direction: column; align-items: flex-start; }
+}
