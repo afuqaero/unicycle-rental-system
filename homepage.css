@@ -44,9 +44,14 @@
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    color: var(--text);
+    color: white;
     font-weight: 700;
     font-size: 20px;
+    transition: color 0.3s;
+}
+
+.navbar.scrolled .nav-logo {
+    color: var(--text);
 }
 
 .logo-icon {
@@ -69,15 +74,24 @@
 
 .nav-link {
     text-decoration: none;
-    color: var(--text);
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
     font-size: 15px;
-    transition: color 0.2s;
+    transition: color 0.3s;
     position: relative;
 }
 
 .nav-link:hover,
 .nav-link.active {
+    color: white;
+}
+
+.navbar.scrolled .nav-link {
+    color: var(--text);
+}
+
+.navbar.scrolled .nav-link:hover,
+.navbar.scrolled .nav-link.active {
     color: var(--blue);
 }
 
@@ -88,8 +102,13 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--blue);
+    background: white;
     border-radius: 1px;
+    transition: background 0.3s;
+}
+
+.navbar.scrolled .nav-link.active::after {
+    background: var(--blue);
 }
 
 .nav-buttons {
@@ -103,13 +122,24 @@
     text-decoration: none;
     font-weight: 500;
     font-size: 14px;
-    border: 1px solid #e0e0e0;
-    color: var(--text);
-    background: white;
-    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    background: transparent;
+    transition: all 0.3s;
 }
 
 .btn-login:hover {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar.scrolled .btn-login {
+    border-color: #e0e0e0;
+    color: var(--text);
+    background: white;
+}
+
+.navbar.scrolled .btn-login:hover {
     border-color: var(--blue);
     color: var(--blue);
 }
@@ -155,16 +185,31 @@
     display: flex;
     align-items: center;
     padding: 100px 30px 60px;
-    background: linear-gradient(135deg, #fafbff 0%, #f5f7ff 100%);
+    position: relative;
+    background: url('assets/hero-riders.png') center center / cover no-repeat;
+}
+
+/* Dark overlay for hero background */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 20, 60, 0.75) 0%, rgba(0, 0, 0, 0.6) 100%);
+    z-index: 1;
 }
 
 .hero-container {
     max-width: 1200px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+.hero-content {
+    max-width: 600px;
 }
 
 .hero-badge {
@@ -200,16 +245,16 @@
     font-weight: 800;
     line-height: 1.15;
     margin-bottom: 20px;
-    color: var(--text);
+    color: white;
 }
 
 .text-blue {
-    color: var(--blue);
+    color: #4da3ff;
 }
 
 .hero-subtitle {
     font-size: 18px;
-    color: #666;
+    color: rgba(255, 255, 255, 0.85);
     margin-bottom: 35px;
 }
 
@@ -242,15 +287,16 @@
     text-decoration: none;
     font-weight: 600;
     font-size: 15px;
-    background: white;
-    color: var(--text);
-    border: 1px solid #e0e0e0;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s;
+    backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    border-color: var(--blue);
-    color: var(--blue);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .hero-stats {
@@ -267,38 +313,18 @@
 .stat-number {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text);
+    color: white;
 }
 
 .stat-label {
     font-size: 14px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .stat-divider {
     width: 1px;
     height: 40px;
-    background: #e0e0e0;
-}
-
-.hero-image {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.image-frame {
-    position: relative;
-    background: linear-gradient(135deg, #1a1a1a, #333);
-    border-radius: 30px;
-    padding: 12px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
-}
-
-.image-frame img {
-    width: 100%;
-    max-width: 480px;
-    border-radius: 20px;
-    display: block;
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* =========================
@@ -474,8 +500,8 @@
    RESPONSIVE
    ========================= */
 @media (max-width: 992px) {
-    .hero-container {
-        grid-template-columns: 1fr;
+    .hero-content {
+        max-width: 100%;
         text-align: center;
     }
 
@@ -489,15 +515,6 @@
 
     .hero-stats {
         justify-content: center;
-    }
-
-    .hero-image {
-        justify-content: center;
-        order: -1;
-    }
-
-    .image-frame img {
-        max-width: 350px;
     }
 
     .why-us-card,

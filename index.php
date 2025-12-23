@@ -74,13 +74,9 @@
                     </div>
                 </div>
             </div>
-
-            <div class="hero-image">
-                <div class="image-frame">
-                    <img src="assets/hero-riders.png" alt="Students riding bikes on campus">
-                </div>
-            </div>
         </div>
+        <!-- Hero background overlay -->
+        <div class="hero-overlay"></div>
     </section>
 
     <!-- Why Us Section -->

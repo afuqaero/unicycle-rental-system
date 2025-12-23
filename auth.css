@@ -14,6 +14,73 @@
     overflow: hidden;
 }
 
+/* Split layout for login page */
+.auth-body-split {
+    padding: 40px;
+}
+
+.auth-split-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    max-width: 1100px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+}
+
+.auth-welcome {
+    flex: 1;
+    max-width: 450px;
+}
+
+.auth-welcome h1 {
+    font-size: 72px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.auth-welcome p {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+/* Responsive for split layout */
+@media (max-width: 900px) {
+    .auth-split-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .auth-welcome {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .auth-welcome h1 {
+        font-size: 48px;
+    }
+
+    .auth-welcome p {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-body-split {
+        padding: 20px;
+    }
+
+    .auth-welcome h1 {
+        font-size: 36px;
+    }
+}
+
 /* =========================
    VIDEO BACKGROUND
    ========================= */
@@ -63,9 +130,32 @@
 
 .auth-container {
     width: 100%;
-    max-width: 440px;
+    max-width: 520px;
     position: relative;
     z-index: 10;
+}
+
+/* Select dropdown styling */
+.role-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(0, 82, 212, 0.1);
 }
 
 .auth-card {
@@ -369,4 +459,130 @@
     .auth-tab {
         width: 100%;
     }
+
+    .role-selector {
+        flex-direction: column;
+    }
+}
+
+/* =========================
+   ROLE SELECTOR
+   ========================= */
+.role-selector {
+    display: flex;
+    gap: 15px;
+}
+
+.role-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.role-option input[type="radio"] {
+    display: none;
+}
+
+.role-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.2s;
+    background: #f9f9f9;
+}
+
+.role-option input[type="radio"]:checked+.role-card {
+    border-color: var(--blue);
+    background: linear-gradient(135deg, #e8f0ff, #f0f5ff);
+    box-shadow: 0 2px 10px rgba(0, 82, 212, 0.15);
+}
+
+.role-icon {
+    font-size: 32px;
+}
+
+.role-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* =========================
+   SUCCESS POPUP
+   ========================= */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.popup-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: popupIn 0.3s ease-out;
+}
+
+@keyframes popupIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.popup-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.popup-icon.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.popup-card h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+.popup-card p {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.popup-card .btn-auth-primary {
+    display: inline-block;
+    width: auto;
+    padding: 14px 35px;
+    text-decoration: none;
 }
