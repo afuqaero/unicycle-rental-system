@@ -1,11 +1,17 @@
 <?php
+session_start();
 require_once "config.php";
 require_once "guard_active_rental.php";
 
-$student_id = 1;
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+  header('Location: login.php');
+  exit;
+}
+$student_id = $_SESSION['student_id'];
 
-$penalty_id = isset($_POST['penalty_id']) ? (int)$_POST['penalty_id'] : 0;
-if ($penalty_id <= 0) die("Invalid request.");
+$penalty_id = isset($_POST['penalty_id']) ? (int) $_POST['penalty_id'] : 0;
+if ($penalty_id <= 0)
+  die("Invalid request.");
 
 // security: ensure penalty belongs to this student
 $stmt = $pdo->prepare("
@@ -18,7 +24,8 @@ $stmt = $pdo->prepare("
 $stmt->execute([$penalty_id, $student_id]);
 $ok = $stmt->fetch();
 
-if (!$ok) die("Penalty not found / already paid.");
+if (!$ok)
+  die("Penalty not found / already paid.");
 
 // mark paid
 $stmt = $pdo->prepare("UPDATE penalties SET status='paid' WHERE penalty_id=?");

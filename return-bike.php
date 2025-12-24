@@ -1,22 +1,28 @@
 <?php
+session_start();
 require_once "config.php";
-if (session_status() === PHP_SESSION_NONE) session_start();
 
-$student_id = 1; // no login yet
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+$student_id = $_SESSION['student_id'];
 
-$rental_id = isset($_POST['rental_id']) ? (int)$_POST['rental_id'] : 0;
-if ($rental_id <= 0) die("Invalid request.");
+$rental_id = isset($_POST['rental_id']) ? (int) $_POST['rental_id'] : 0;
+if ($rental_id <= 0)
+    die("Invalid request.");
 
-if (empty($_SESSION['active_rental_id']) || (int)$_SESSION['active_rental_id'] !== $rental_id) {
+if (empty($_SESSION['active_rental_id']) || (int) $_SESSION['active_rental_id'] !== $rental_id) {
     die("Unauthorized action.");
 }
 
 // Optional Bike Condition Report
 $condition = trim($_POST['condition_status'] ?? ""); // good | minor_issue | needs_repair | ""
-$note      = trim($_POST['note'] ?? "");
+$note = trim($_POST['note'] ?? "");
 
 $allowed = ["", "good", "minor_issue", "needs_repair"];
-if (!in_array($condition, $allowed, true)) die("Invalid condition.");
+if (!in_array($condition, $allowed, true))
+    die("Invalid condition.");
 
 // Penalty rules
 $GRACE_MINUTES = 10;
@@ -35,16 +41,17 @@ try {
     ");
     $stmt->execute([$rental_id]);
     $r = $stmt->fetch();
-    if (!$r) throw new Exception("Active rental not found.");
+    if (!$r)
+        throw new Exception("Active rental not found.");
 
-    $bike_id = (int)$r['bike_id'];
+    $bike_id = (int) $r['bike_id'];
 
     // Close rental
     $now_ts = time();
     $now_dt = date("Y-m-d H:i:s", $now_ts);
 
     $expected_ts = strtotime($r['expected_return_time']);
-    $late_minutes_raw = (int)ceil(($now_ts - $expected_ts) / 60);
+    $late_minutes_raw = (int) ceil(($now_ts - $expected_ts) / 60);
     $late_minutes = max(0, $late_minutes_raw);
 
     // apply grace
@@ -72,7 +79,7 @@ try {
 
     // Penalty calculation (only if late after grace)
     if ($late_minutes_after_grace > 0) {
-        $late_hours = (int)ceil($late_minutes_after_grace / 60);
+        $late_hours = (int) ceil($late_minutes_after_grace / 60);
 
         if ($late_hours <= 2) {
             $penalty_amount = $late_hours * $RATE_FIRST_2H;

@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
         $error = 'Please fill in all fields.';
     } else {
         // Check against students table
-        $stmt = $pdo->prepare("SELECT student_id, name, email, password FROM students WHERE email = ? OR student_id = ?");
+        $stmt = $pdo->prepare("SELECT student_id, name, email, password FROM students WHERE email = ? OR student_staff_id = ?");
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch();
 
@@ -166,28 +166,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
     </div>
 
     <script>
-            // Tab switching
-            const tabs = document.querySelectorAll('.auth-tab');
-            const forms = document.querySelectorAll('.auth-form');
+        // Tab switching
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.dataset.tab;
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
 
-                    // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
 
-                    // Show corresponding form
-                    forms.forEach(form => {
-                        form.classList.remove('active');
-                        if (form.id === targetTab + '-form') {
-                            form.classList.add('active');
-                        }
-                    });
+                // Show corresponding form
+                forms.forEach(form => {
+                    form.classList.remove('active');
+                    if (form.id === targetTab + '-form') {
+                        form.classList.add('active');
+                    }
                 });
             });
-        </script>
+        });
+    </script>
 </body>
 
 </html>

@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
 $port = 3307;
-$db = "bike_rental_test";
+$db = "unicycle_db";
 $user = "root";
 $pass = "";
 

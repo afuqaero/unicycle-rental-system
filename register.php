@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Passwords do not match.';
     } else {
         // Check if email or student_id already exists
-        $stmt = $pdo->prepare("SELECT student_id FROM students WHERE email = ? OR student_id = ?");
+        $stmt = $pdo->prepare("SELECT student_id FROM students WHERE email = ? OR student_staff_id = ?");
         $stmt->execute([$email, $student_id]);
 
         if ($stmt->fetch()) {
@@ -32,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Insert new user
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO students (student_id, name, email, role, password) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO students (name, email, student_staff_id, role, password) VALUES (?, ?, ?, ?, ?)");
 
             try {
-                $stmt->execute([$student_id, $name, $email, $role, $hashed_password]);
+                $stmt->execute([$name, $email, $student_id, $role, $hashed_password]);
                 $success = true;
             } catch (PDOException $e) {
                 $error = 'Registration failed. Please try again.';

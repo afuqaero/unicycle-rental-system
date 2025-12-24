@@ -1,8 +1,26 @@
 <?php
+session_start();
 require_once "config.php";
 require_once "guard_active_rental.php";
 
-$student_id = 1;
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+$student_id = $_SESSION['student_id'];
+$student_name = $_SESSION['student_name'] ?? 'User';
+
+// Get user initials for avatar
+$nameParts = explode(' ', $student_name);
+$initials = strtoupper(substr($nameParts[0], 0, 1));
+if (isset($nameParts[1])) {
+    $initials .= strtoupper(substr($nameParts[1], 0, 1));
+}
+
+// Get total rides count
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=?");
+$stmt->execute([$student_id]);
+$totalRentals = (int)$stmt->fetchColumn();
 
 // block if unpaid penalties
 $stmt = $pdo->prepare("
@@ -12,74 +30,433 @@ $stmt = $pdo->prepare("
   WHERE r.student_id=? AND p.status='unpaid'
 ");
 $stmt->execute([$student_id]);
-if ((int)$stmt->fetchColumn() > 0) {
-    die("You have unpaid penalties. Rental blocked.");
+if ((int) $stmt->fetchColumn() > 0) {
+    header("Location: pay-penalty.php");
+    exit;
 }
 
-$bike_id = isset($_GET['bike_id']) ? (int)$_GET['bike_id'] : 0;
-if ($bike_id <= 0) die("Invalid bike.");
+$bike_id = isset($_GET['bike_id']) ? (int) $_GET['bike_id'] : 0;
+if ($bike_id <= 0) {
+    header("Location: available-bikes.php");
+    exit;
+}
 
 $stmt = $pdo->prepare("
-  SELECT bike_id, bike_name, status, location
+  SELECT bike_id, bike_name, bike_type, status, location
   FROM bikes
   WHERE bike_id=?
 ");
 $stmt->execute([$bike_id]);
 $bike = $stmt->fetch();
-if (!$bike || $bike['status'] !== 'available') die("Bike not available.");
+if (!$bike || $bike['status'] !== 'available') {
+    header("Location: available-bikes.php");
+    exit;
+}
 
 $rate = 3.00;
+$bikeIcon = ($bike['bike_type'] ?? 'city') === 'mountain' ? '🚵' : '🚲';
+$currentDate = date('l, F j, Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Confirm Rental</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Confirm Rental - UniCycle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dashboard.css?v=7">
+    <style>
+        /* Confirm Rental Styles */
+        .confirm-container {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .confirm-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .confirm-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            padding: 32px;
+            text-align: center;
+            color: white;
+        }
+
+        .confirm-header .bike-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+
+        .confirm-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .confirm-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .confirm-body {
+            padding: 32px;
+        }
+
+        /* Bike Details */
+        .bike-details {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row .label {
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-row .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Duration Selector */
+        .duration-section {
+            margin-bottom: 24px;
+        }
+
+        .duration-section label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .duration-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .duration-option {
+            position: relative;
+        }
+
+        .duration-option input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .duration-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 8px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .duration-option input:checked + label {
+            border-color: #8b5cf6;
+            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+        }
+
+        .duration-option label:hover {
+            border-color: #c4b5fd;
+        }
+
+        .duration-option .hours {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .duration-option .unit {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .duration-option .price {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-top: 4px;
+        }
+
+        /* Price Summary */
+        .price-summary {
+            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+            border: 2px solid #c4b5fd;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .price-summary .total-label {
+            font-size: 14px;
+            color: #6b21a8;
+            margin-bottom: 4px;
+        }
+
+        .price-summary .total-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #7c3aed;
+        }
+
+        /* Buttons */
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-buttons .back-btn {
+            flex: 1;
+            padding: 16px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .form-buttons .back-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .form-buttons .submit-btn {
+            flex: 2;
+            padding: 16px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-buttons .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        @media (max-width: 480px) {
+            .duration-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="sidebar">
-  <h2>BikeRental</h2>
-  <a href="dashboard.php">Dashboard</a>
-  <a href="available-bikes.php" class="active">Available Bikes</a>
-  <a href="rental-summary.php">Rental Summary</a>
-  <a href="complaints.php">Complaints</a>
-  <div class="logout">Logout</div>
-</div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="dashboard.php" class="sidebar-logo">
+                <div class="logo-icon">U</div>
+                <span class="logo-text">UniCycle</span>
+            </a>
+        </div>
 
-<div class="main">
-  <h1>Confirm Rental</h1>
-  <p class="sub">Rate: RM 3 per hour</p>
+        <div class="user-section">
+            <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+            <div class="user-welcome">
+                <span class="welcome-label">Welcome back,</span>
+                <span class="user-name"><?= htmlspecialchars($student_name) ?></span>
+            </div>
+            <div class="user-stats">
+                <div class="user-stat">
+                    <span class="stat-number"><?= $totalRentals ?></span>
+                    <span class="stat-text">Total Rides</span>
+                </div>
+            </div>
+        </div>
 
-  <div class="card">
-    <form action="payment.php" method="post">
-      <input type="hidden" name="bike_id" value="<?= (int)$bike['bike_id'] ?>">
+        <nav class="sidebar-nav">
+            <a href="dashboard.php" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="available-bikes.php" class="nav-item active">
+                <span class="nav-icon">🚲</span>
+                <span>Available Bikes</span>
+            </a>
+            <a href="rental-summary.php" class="nav-item">
+                <span class="nav-icon">📋</span>
+                <span>Rental Summary</span>
+            </a>
+            <a href="complaints.php" class="nav-item">
+                <span class="nav-icon">💬</span>
+                <span>Complaints</span>
+            </a>
+        </nav>
 
-      <p><strong>Bike:</strong> <?= htmlspecialchars($bike['bike_name']) ?></p>
-      <p><strong>Location:</strong> <?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></p>
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="showLogoutModal()">
+                <span>🚪</span>
+                <span>Sign out</span>
+            </button>
+        </div>
+    </aside>
 
-      <div style="margin-top:14px;">
-        <label for="hours"><strong>Hours:</strong></label>
-        <select name="hours" id="hours" required>
-          <?php for ($i=1; $i<=8; $i++): ?>
-            <option value="<?= $i ?>"><?= $i ?> hour(s)</option>
-          <?php endfor; ?>
-        </select>
-      </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Banner -->
+        <div class="header-banner" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);">
+            <div class="banner-pattern"></div>
+            <div class="banner-content">
+                <div class="banner-dots">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <h1>Confirm Rental</h1>
+                <p class="banner-date"><?= $currentDate ?></p>
+            </div>
+        </div>
 
-      <p style="margin-top:14px;">
-        <strong>Date/Time:</strong> <?= date("Y-m-d H:i") ?>
-      </p>
+        <!-- Content -->
+        <div class="dashboard-content" style="display: block;">
+            <div class="confirm-container">
+                <div class="confirm-card">
+                    <div class="confirm-header">
+                        <div class="bike-icon"><?= $bikeIcon ?></div>
+                        <h2><?= htmlspecialchars($bike['bike_name']) ?></h2>
+                        <p>Select duration and confirm</p>
+                    </div>
 
-      <div style="margin-top:18px; display:flex; gap:10px;">
-        <button type="submit">Confirm & Proceed to Payment</button>
-        <a class="view-btn" style="background:#6091D4" href="available-bikes.php">Cancel</a>
-      </div>
-    </form>
-  </div>
-</div>
+                    <div class="confirm-body">
+                        <form action="payment.php" method="post">
+                            <input type="hidden" name="bike_id" value="<?= (int) $bike['bike_id'] ?>">
+
+                            <!-- Bike Details -->
+                            <div class="bike-details">
+                                <div class="detail-row">
+                                    <span class="label">📍 Location</span>
+                                    <span class="value"><?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">💰 Rate</span>
+                                    <span class="value">RM <?= number_format($rate, 2) ?> / hour</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">🕐 Date</span>
+                                    <span class="value"><?= date("M j, Y g:i A") ?></span>
+                                </div>
+                            </div>
+
+                            <!-- Duration Selector -->
+                            <div class="duration-section">
+                                <label>Choose Duration</label>
+                                <div class="duration-options">
+                                    <?php for ($i = 1; $i <= 8; $i++): ?>
+                                    <div class="duration-option">
+                                        <input type="radio" name="hours" id="hours<?= $i ?>" value="<?= $i ?>" <?= $i === 1 ? 'checked' : '' ?>>
+                                        <label for="hours<?= $i ?>">
+                                            <span class="hours"><?= $i ?></span>
+                                            <span class="unit">hour<?= $i > 1 ? 's' : '' ?></span>
+                                            <span class="price">RM <?= number_format($rate * $i, 2) ?></span>
+                                        </label>
+                                    </div>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+
+                            <!-- Price Summary -->
+                            <div class="price-summary">
+                                <div class="total-label">Total Amount</div>
+                                <div class="total-amount" id="totalAmount">RM <?= number_format($rate, 2) ?></div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="form-buttons">
+                                <a href="available-bikes.php" class="back-btn">Cancel</a>
+                                <button type="submit" class="submit-btn">Proceed to Payment →</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Logout Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-box">
+            <div class="modal-icon">🚪</div>
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to sign out?</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="hideLogoutModal()">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmLogout()">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rate = <?= $rate ?>;
+
+        // Update total when duration changes
+        document.querySelectorAll('input[name="hours"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const hours = parseInt(this.value);
+                const total = rate * hours;
+                document.getElementById('totalAmount').textContent = 'RM ' + total.toFixed(2);
+            });
+        });
+
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('active');
+        }
+
+        function confirmLogout() {
+            window.location.href = 'logout.php';
+        }
+
+        document.getElementById('logoutModal').addEventListener('click', function(e) {
+            if (e.target === this) hideLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') hideLogoutModal();
+        });
+    </script>
 
 </body>
+
 </html>
