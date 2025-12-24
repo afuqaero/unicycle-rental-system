@@ -607,3 +607,260 @@
         text-align: center;
     }
 }
+
+/* =========================
+   SCROLL REVEAL ANIMATIONS
+   ========================= */
+
+/* Base reveal class - hidden by default */
+.reveal {
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+/* Fade up animation */
+.reveal.fade-up {
+    transform: translateY(40px);
+}
+
+.reveal.fade-up.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Fade left animation */
+.reveal.fade-left {
+    transform: translateX(40px);
+}
+
+.reveal.fade-left.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Fade right animation */
+.reveal.fade-right {
+    transform: translateX(-40px);
+}
+
+.reveal.fade-right.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Fade in animation */
+.reveal.fade-in {
+    transform: scale(0.95);
+}
+
+.reveal.fade-in.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* =========================
+   BUTTON ANIMATIONS
+   ========================= */
+
+/* Pulse hover effect */
+.pulse-hover {
+    position: relative;
+}
+
+.pulse-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: inherit;
+    z-index: -1;
+    opacity: 0;
+    transform: scale(1);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.pulse-hover:hover::before {
+    opacity: 0.3;
+    transform: scale(1.1);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 0.15;
+    }
+}
+
+/* =========================
+   STAT COUNTER ANIMATION
+   ========================= */
+.stat-number {
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+}
+
+/* =========================
+   STEP HOVER EFFECTS
+   ========================= */
+.step {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 15px;
+    border-radius: 16px;
+    margin: -15px;
+}
+
+.step:hover {
+    transform: translateX(8px);
+    background: rgba(26, 109, 255, 0.03);
+}
+
+.step-icon {
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.step:hover .step-icon {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #d0e1ff, #b8d4ff);
+}
+
+/* =========================
+   CARD HOVER EFFECTS
+   ========================= */
+.why-us-card,
+.how-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.why-us-card:hover,
+.how-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================
+   IMAGE HOVER EFFECTS
+   ========================= */
+.why-us-image img,
+.how-image img {
+    transition: transform 0.5s ease;
+}
+
+.why-us-image:hover img,
+.how-image:hover img {
+    transform: scale(1.03);
+}
+
+/* =========================
+   NAVBAR LINK ANIMATION
+   ========================= */
+.nav-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link:hover::before {
+    width: 100%;
+    left: 0;
+}
+
+/* =========================
+   TYPING CURSOR EFFECT
+   ========================= */
+.typing-text {
+    position: relative;
+}
+
+/* =========================
+   LOADING ANIMATION
+   ========================= */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =========================
+   SMOOTH SCROLL INDICATOR
+   ========================= */
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
