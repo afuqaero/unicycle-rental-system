@@ -3,32 +3,71 @@ require_once "config.php";
 if (session_status() === PHP_SESSION_NONE)
   session_start();
 
-$rental_id = isset($_POST['rental_id']) ? (int) $_POST['rental_id'] : 0;
+// Get bike_id and hours from the payment form
+$bike_id = isset($_POST['bike_id']) ? (int) $_POST['bike_id'] : 0;
+$hours = isset($_POST['hours']) ? (int) $_POST['hours'] : 0;
 $amount = isset($_POST['amount']) ? (float) $_POST['amount'] : 0;
 
-if ($rental_id <= 0) {
+if ($bike_id <= 0 || $hours <= 0) {
   header("Location: available-bikes.php");
   exit;
 }
 
-$stmt = $pdo->prepare("INSERT INTO payments (rental_id, amount, method, status) VALUES (?, ?, 'cashless', 'paid')");
-$stmt->execute([$rental_id, $amount]);
+$student_id = $_SESSION['student_id'] ?? 0;
+if ($student_id <= 0) {
+  header("Location: login.php");
+  exit;
+}
 
+// Create rental, update bike status, and record payment in one transaction
+$pdo->beginTransaction();
+
+try {
+  // Lock bike row and verify still available
+  $stmt = $pdo->prepare("SELECT bike_id, bike_name, bike_type, status FROM bikes WHERE bike_id=? FOR UPDATE");
+  $stmt->execute([$bike_id]);
+  $bike = $stmt->fetch();
+
+  if (!$bike || $bike['status'] !== 'available') {
+    throw new Exception("Bike is no longer available.");
+  }
+
+  $start = date("Y-m-d H:i:s");
+  $expected = date("Y-m-d H:i:s", time() + ($hours * 3600));
+  $rate = 3.00;
+  $amount = $rate * $hours;
+
+  $rental_code = "RENT" . str_pad((string) random_int(1, 999999), 6, "0", STR_PAD_LEFT);
+
+  // Create rental
+  $stmt = $pdo->prepare("
+    INSERT INTO rentals (rental_code, student_id, bike_id, start_time, expected_return_time, status, hourly_rate, planned_hours)
+    VALUES (?, ?, ?, ?, ?, 'active', ?, ?)
+  ");
+  $stmt->execute([$rental_code, $student_id, $bike_id, $start, $expected, $rate, $hours]);
+  $rental_id = (int) $pdo->lastInsertId();
+
+  // Set bike to rented
+  $stmt = $pdo->prepare("UPDATE bikes SET status='rented' WHERE bike_id=?");
+  $stmt->execute([$bike_id]);
+
+  // Create payment record
+  $stmt = $pdo->prepare("INSERT INTO payments (rental_id, amount, method, status) VALUES (?, ?, 'cashless', 'paid')");
+  $stmt->execute([$rental_id, $amount]);
+
+  $pdo->commit();
+} catch (Exception $e) {
+  $pdo->rollBack();
+  header("Location: available-bikes.php?error=" . urlencode($e->getMessage()));
+  exit;
+}
+
+// Set session for active rental
 $_SESSION['active_rental_id'] = $rental_id;
 
-// Get rental details
-$stmt = $pdo->prepare("
-    SELECT r.rental_code, b.bike_name, b.bike_type
-    FROM rentals r
-    JOIN bikes b ON b.bike_id = r.bike_id
-    WHERE r.rental_id = ?
-");
-$stmt->execute([$rental_id]);
-$rental = $stmt->fetch();
-
-$bikeName = $rental['bike_name'] ?? 'Bike';
-$bikeIcon = ($rental['bike_type'] ?? 'city') === 'mountain' ? '🚵' : '🚲';
-$rentalCode = $rental['rental_code'] ?? 'N/A';
+$bikeName = $bike['bike_name'] ?? 'Bike';
+$bikeIcon = ($bike['bike_type'] ?? 'city') === 'mountain' ? '🚵' : '🚲';
+$rentalCode = $rental_code;
 ?>
 <!DOCTYPE html>
 <html lang="en">

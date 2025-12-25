@@ -78,16 +78,23 @@ CREATE TABLE `bikes` (
     UNIQUE KEY `bike_code` (`bike_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample bikes data
+-- Sample bikes data (15 bikes total: 8 mountain, 7 city)
 INSERT INTO `bikes` (`bike_id`, `bike_code`, `bike_name`, `bike_type`, `status`, `location`, `last_maintained_date`) VALUES
-(1, 'MTB-001', 'Mountain Bike #1', 'mountain', 'maintenance', 'Main Bike Area', '2025-12-01'),
-(2, 'CTY-002', 'City Bike #2', 'city', 'rented', 'Main Bike Area', '2025-12-03'),
+(1, 'MTB-001', 'Mountain Bike #1', 'mountain', 'available', 'Main Bike Area', '2025-12-01'),
+(2, 'CTY-002', 'City Bike #2', 'city', 'available', 'Main Bike Area', '2025-12-03'),
 (3, 'MTB-003', 'Mountain Bike #3', 'mountain', 'available', 'Main Bike Area', '2025-11-28'),
 (4, 'CTY-004', 'City Bike #4', 'city', 'maintenance', 'Main Bike Area', '2025-11-15'),
-(5, 'MTB-005', 'Mountain Bike #5', 'mountain', 'rented', 'Main Bike Area', '2025-12-05'),
+(5, 'MTB-005', 'Mountain Bike #5', 'mountain', 'available', 'Main Bike Area', '2025-12-05'),
 (6, 'CTY-006', 'City Bike #6', 'city', 'available', 'Main Bike Area', '2025-11-30'),
 (7, 'MTB-007', 'Mountain Bike #7', 'mountain', 'available', 'Main Bike Area', '2025-12-06'),
-(8, 'CTY-008', 'City Bike #8', 'city', 'maintenance', 'Main Bike Area', '2025-12-02');
+(8, 'CTY-008', 'City Bike #8', 'city', 'available', 'Main Bike Area', '2025-12-02'),
+(9, 'MTB-009', 'Mountain Bike #9', 'mountain', 'available', 'Main Bike Area', '2025-12-10'),
+(10, 'CTY-010', 'City Bike #10', 'city', 'available', 'Main Bike Area', '2025-12-08'),
+(11, 'MTB-011', 'Mountain Bike #11', 'mountain', 'maintenance', 'Main Bike Area', '2025-12-12'),
+(12, 'CTY-012', 'City Bike #12', 'city', 'available', 'Main Bike Area', '2025-12-15'),
+(13, 'MTB-013', 'Mountain Bike #13', 'mountain', 'available', 'Main Bike Area', '2025-12-18'),
+(14, 'CTY-014', 'City Bike #14', 'city', 'available', 'Main Bike Area', '2025-12-20'),
+(15, 'MTB-015', 'Mountain Bike #15', 'mountain', 'available', 'Main Bike Area', '2025-12-22');
 
 -- ============================================
 -- Table: rentals
@@ -197,38 +204,46 @@ CREATE TABLE `bike_feedback` (
 
 -- ============================================
 -- Foreign Key Constraints
+-- ALL use ON DELETE CASCADE ON UPDATE CASCADE
+-- for proper synchronization across tables
 -- ============================================
 
 -- Rentals constraints
+-- Deleting a student or bike will delete their rentals
 ALTER TABLE `rentals`
-    ADD CONSTRAINT `fk_rental_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON UPDATE CASCADE,
-    ADD CONSTRAINT `fk_rental_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON UPDATE CASCADE;
+    ADD CONSTRAINT `fk_rental_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_rental_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Payments constraints
+-- Deleting a rental will delete its payments
 ALTER TABLE `payments`
     ADD CONSTRAINT `fk_payment_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Penalties constraints
+-- Deleting a rental will delete its penalties
 ALTER TABLE `penalties`
     ADD CONSTRAINT `fk_penalty_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Complaints constraints
+-- Deleting a student will delete their complaints
+-- Deleting a rental will delete related complaints
 ALTER TABLE `complaints`
-    ADD CONSTRAINT `fk_complaint_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON UPDATE CASCADE,
-    ADD CONSTRAINT `fk_complaint_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+    ADD CONSTRAINT `fk_complaint_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_complaint_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Bike feedback constraints
+-- Deleting a rental, bike, or student will delete related feedback
 ALTER TABLE `bike_feedback`
-    ADD CONSTRAINT `fk_feedback_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE,
-    ADD CONSTRAINT `fk_feedback_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`),
-    ADD CONSTRAINT `fk_feedback_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`);
+    ADD CONSTRAINT `fk_feedback_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_feedback_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_feedback_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ============================================
 -- Set AUTO_INCREMENT values
 -- ============================================
 ALTER TABLE `admin` MODIFY `admin_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 ALTER TABLE `students` MODIFY `student_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-ALTER TABLE `bikes` MODIFY `bike_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+ALTER TABLE `bikes` MODIFY `bike_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 ALTER TABLE `rentals` MODIFY `rental_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 ALTER TABLE `payments` MODIFY `payment_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 ALTER TABLE `penalties` MODIFY `penalty_id` INT(11) NOT NULL AUTO_INCREMENT;

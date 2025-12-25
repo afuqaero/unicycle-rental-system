@@ -525,7 +525,6 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
 
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="showLogoutModal()">
-        <span>🚪</span>
         <span>Sign out</span>
       </button>
     </div>
@@ -697,7 +696,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">🚪</div>
+      <div class="modal-icon">⚠️</div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

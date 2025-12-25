@@ -486,7 +486,6 @@ $currentDate = date('l, F j, Y');
         <!-- Sign Out -->
         <div class="sidebar-footer">
             <button class="logout-btn" onclick="showLogoutModal()">
-                <span>🚪</span>
                 <span>Sign out</span>
             </button>
         </div>
@@ -658,7 +657,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">🚪</div>
+            <div class="modal-icon">⚠️</div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

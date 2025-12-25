@@ -1,4 +1,7 @@
 <?php
+// Set Malaysian timezone (UTC+8)
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 $host = "localhost";
 $port = 3307;
 $db = "unicycle_db";

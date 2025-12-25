@@ -20,7 +20,7 @@ if (isset($nameParts[1])) {
 // Get total rides count
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=?");
 $stmt->execute([$student_id]);
-$totalRentals = (int)$stmt->fetchColumn();
+$totalRentals = (int) $stmt->fetchColumn();
 
 // block if unpaid penalties
 $stmt = $pdo->prepare("
@@ -80,7 +80,7 @@ $currentDate = date('l, F j, Y');
         }
 
         .confirm-header {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #1a6dff 0%, #0052d4 100%);
             padding: 32px;
             text-align: center;
             color: white;
@@ -180,13 +180,13 @@ $currentDate = date('l, F j, Y');
             transition: all 0.2s;
         }
 
-        .duration-option input:checked + label {
-            border-color: #8b5cf6;
-            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+        .duration-option input:checked+label {
+            border-color: #1a6dff;
+            background: linear-gradient(135deg, #e8f4ff 0%, #dbeafe 100%);
         }
 
         .duration-option label:hover {
-            border-color: #c4b5fd;
+            border-color: #93c5fd;
         }
 
         .duration-option .hours {
@@ -203,14 +203,14 @@ $currentDate = date('l, F j, Y');
         .duration-option .price {
             font-size: 13px;
             font-weight: 600;
-            color: #8b5cf6;
+            color: #1a6dff;
             margin-top: 4px;
         }
 
         /* Price Summary */
         .price-summary {
-            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
-            border: 2px solid #c4b5fd;
+            background: linear-gradient(135deg, #e8f4ff 0%, #dbeafe 100%);
+            border: 2px solid #93c5fd;
             border-radius: 16px;
             padding: 20px;
             text-align: center;
@@ -219,14 +219,14 @@ $currentDate = date('l, F j, Y');
 
         .price-summary .total-label {
             font-size: 14px;
-            color: #6b21a8;
+            color: #0052d4;
             margin-bottom: 4px;
         }
 
         .price-summary .total-amount {
             font-size: 36px;
             font-weight: 700;
-            color: #7c3aed;
+            color: #1a6dff;
         }
 
         /* Buttons */
@@ -257,7 +257,7 @@ $currentDate = date('l, F j, Y');
         .form-buttons .submit-btn {
             flex: 2;
             padding: 16px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #1a6dff 0%, #0052d4 100%);
             color: white;
             border: none;
             border-radius: 12px;
@@ -269,7 +269,7 @@ $currentDate = date('l, F j, Y');
 
         .form-buttons .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 8px 24px rgba(26, 109, 255, 0.3);
         }
 
         @media (max-width: 480px) {
@@ -326,7 +326,6 @@ $currentDate = date('l, F j, Y');
 
         <div class="sidebar-footer">
             <button class="logout-btn" onclick="showLogoutModal()">
-                <span>🚪</span>
                 <span>Sign out</span>
             </button>
         </div>
@@ -335,7 +334,7 @@ $currentDate = date('l, F j, Y');
     <!-- Main Content -->
     <main class="main-content">
         <!-- Header Banner -->
-        <div class="header-banner" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);">
+        <div class="header-banner">
             <div class="banner-pattern"></div>
             <div class="banner-content">
                 <div class="banner-dots">
@@ -364,7 +363,8 @@ $currentDate = date('l, F j, Y');
                             <div class="bike-details">
                                 <div class="detail-row">
                                     <span class="label">📍 Location</span>
-                                    <span class="value"><?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></span>
+                                    <span
+                                        class="value"><?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="label">💰 Rate</span>
@@ -381,14 +381,14 @@ $currentDate = date('l, F j, Y');
                                 <label>Choose Duration</label>
                                 <div class="duration-options">
                                     <?php for ($i = 1; $i <= 8; $i++): ?>
-                                    <div class="duration-option">
-                                        <input type="radio" name="hours" id="hours<?= $i ?>" value="<?= $i ?>" <?= $i === 1 ? 'checked' : '' ?>>
-                                        <label for="hours<?= $i ?>">
-                                            <span class="hours"><?= $i ?></span>
-                                            <span class="unit">hour<?= $i > 1 ? 's' : '' ?></span>
-                                            <span class="price">RM <?= number_format($rate * $i, 2) ?></span>
-                                        </label>
-                                    </div>
+                                        <div class="duration-option">
+                                            <input type="radio" name="hours" id="hours<?= $i ?>" value="<?= $i ?>" <?= $i === 1 ? 'checked' : '' ?>>
+                                            <label for="hours<?= $i ?>">
+                                                <span class="hours"><?= $i ?></span>
+                                                <span class="unit">hour<?= $i > 1 ? 's' : '' ?></span>
+                                                <span class="price">RM <?= number_format($rate * $i, 2) ?></span>
+                                            </label>
+                                        </div>
                                     <?php endfor; ?>
                                 </div>
                             </div>
@@ -414,7 +414,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">🚪</div>
+            <div class="modal-icon">⚠️</div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">
@@ -429,7 +429,7 @@ $currentDate = date('l, F j, Y');
 
         // Update total when duration changes
         document.querySelectorAll('input[name="hours"]').forEach(input => {
-            input.addEventListener('change', function() {
+            input.addEventListener('change', function () {
                 const hours = parseInt(this.value);
                 const total = rate * hours;
                 document.getElementById('totalAmount').textContent = 'RM ' + total.toFixed(2);
@@ -448,11 +448,11 @@ $currentDate = date('l, F j, Y');
             window.location.href = 'logout.php';
         }
 
-        document.getElementById('logoutModal').addEventListener('click', function(e) {
+        document.getElementById('logoutModal').addEventListener('click', function (e) {
             if (e.target === this) hideLogoutModal();
         });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') hideLogoutModal();
         });
     </script>

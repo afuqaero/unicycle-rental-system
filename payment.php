@@ -30,41 +30,23 @@ if ($bike_id <= 0 || $hours <= 0) {
   exit;
 }
 
-$pdo->beginTransaction();
+// Only validate bike availability - DO NOT create rental yet
+// Rental will be created in payment-success.php after payment is confirmed
+$stmt = $pdo->prepare("SELECT bike_id, bike_name, bike_type, status FROM bikes WHERE bike_id=?");
+$stmt->execute([$bike_id]);
+$bike = $stmt->fetch();
 
-try {
-  // lock bike row
-  $stmt = $pdo->prepare("SELECT bike_id, bike_name, bike_type, status FROM bikes WHERE bike_id=? FOR UPDATE");
-  $stmt->execute([$bike_id]);
-  $bike = $stmt->fetch();
-  if (!$bike || $bike['status'] !== 'available') {
-    throw new Exception("Bike not available.");
-  }
-
-  $start = date("Y-m-d H:i:s");
-  $expected = date("Y-m-d H:i:s", time() + ($hours * 3600));
-  $rate = 3.00;
-  $amount = $rate * $hours;
-
-  $rental_code = "RENT" . str_pad((string) random_int(1, 999999), 6, "0", STR_PAD_LEFT);
-
-  // create rental
-  $stmt = $pdo->prepare("
-      INSERT INTO rentals (rental_code, student_id, bike_id, start_time, expected_return_time, status, hourly_rate, planned_hours)
-      VALUES (?, ?, ?, ?, ?, 'active', ?, ?)
-    ");
-  $stmt->execute([$rental_code, $student_id, $bike_id, $start, $expected, $rate, $hours]);
-  $rental_id = (int) $pdo->lastInsertId();
-
-  // set bike to rented
-  $stmt = $pdo->prepare("UPDATE bikes SET status='rented' WHERE bike_id=?");
-  $stmt->execute([$bike_id]);
-
-  $pdo->commit();
-} catch (Exception $e) {
-  $pdo->rollBack();
-  die("Failed: " . $e->getMessage());
+if (!$bike || $bike['status'] !== 'available') {
+  header("Location: available-bikes.php?error=unavailable");
+  exit;
 }
+
+// Calculate amounts for display only
+$rate = 3.00;
+$amount = $rate * $hours;
+
+// Generate a preview rental code (actual code created on payment success)
+$rental_code = "RENT" . str_pad((string) random_int(1, 999999), 6, "0", STR_PAD_LEFT);
 
 $bikeIcon = ($bike['bike_type'] ?? 'city') === 'mountain' ? '🚵' : '🚲';
 $currentDate = date('l, F j, Y');
@@ -92,7 +74,7 @@ $currentDate = date('l, F j, Y');
     }
 
     .payment-header {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #1a6dff 0%, #0052d4 100%);
       padding: 40px 32px;
       text-align: center;
       color: white;
@@ -183,8 +165,8 @@ $currentDate = date('l, F j, Y');
 
     /* Rental Code */
     .rental-code-box {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      border: 2px dashed #6ee7b7;
+      background: linear-gradient(135deg, #e8f4ff 0%, #dbeafe 100%);
+      border: 2px dashed #93c5fd;
       border-radius: 12px;
       padding: 16px;
       text-align: center;
@@ -193,7 +175,7 @@ $currentDate = date('l, F j, Y');
 
     .rental-code-box .code-label {
       font-size: 12px;
-      color: #059669;
+      color: #1a6dff;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
@@ -202,7 +184,7 @@ $currentDate = date('l, F j, Y');
     .rental-code-box .code {
       font-size: 24px;
       font-weight: 700;
-      color: #065f46;
+      color: #0052d4;
       letter-spacing: 2px;
     }
 
@@ -288,7 +270,6 @@ $currentDate = date('l, F j, Y');
 
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="showLogoutModal()">
-        <span>🚪</span>
         <span>Sign out</span>
       </button>
     </div>
@@ -297,7 +278,7 @@ $currentDate = date('l, F j, Y');
   <!-- Main Content -->
   <main class="main-content">
     <!-- Header Banner -->
-    <div class="header-banner" style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);">
+    <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
         <div class="banner-dots">
@@ -344,7 +325,8 @@ $currentDate = date('l, F j, Y');
 
             <!-- Pay Button -->
             <form action="payment-success.php" method="post">
-              <input type="hidden" name="rental_id" value="<?= (int) $rental_id ?>">
+              <input type="hidden" name="bike_id" value="<?= (int) $bike_id ?>">
+              <input type="hidden" name="hours" value="<?= (int) $hours ?>">
               <input type="hidden" name="amount" value="<?= htmlspecialchars((string) $amount) ?>">
               <button type="submit" class="pay-btn">
                 <span>💳</span> Pay RM <?= number_format($amount, 2) ?>
@@ -363,7 +345,7 @@ $currentDate = date('l, F j, Y');
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">🚪</div>
+      <div class="modal-icon">⚠️</div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

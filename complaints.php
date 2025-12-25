@@ -88,14 +88,12 @@ $currentDate = date('l, F j, Y');
         .complaints-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             margin-bottom: 24px;
         }
 
         .complaints-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1e293b;
+            display: none;
         }
 
         .new-complaint-btn {
@@ -479,7 +477,6 @@ $currentDate = date('l, F j, Y');
 
         <div class="sidebar-footer">
             <button class="logout-btn" onclick="showLogoutModal()">
-                <span>🚪</span>
                 <span>Sign out</span>
             </button>
         </div>
@@ -616,7 +613,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">🚪</div>
+            <div class="modal-icon">⚠️</div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

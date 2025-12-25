@@ -202,6 +202,7 @@ body {
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid var(--border-light);
+    margin-bottom: 30px;
 }
 
 .logout-btn {
@@ -357,6 +358,34 @@ body {
     font-size: 14px;
     color: var(--text-muted);
     margin-bottom: 24px;
+}
+
+.rent-now-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #1a6dff 0%, #0052d4 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.rent-now-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26, 109, 255, 0.35);
+}
+
+.rent-now-btn span {
+    font-size: 18px;
 }
 
 .progress-section {
@@ -647,7 +676,7 @@ body {
 }
 
 .legend-color.city {
-    background: #3b82f6;
+    background: #f59e0b;
 }
 
 .legend-color.other {

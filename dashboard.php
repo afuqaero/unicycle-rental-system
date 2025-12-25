@@ -75,19 +75,50 @@ $stmt = $pdo->prepare("
 $stmt->execute([$student_id]);
 $active = $stmt->fetch();
 
-// Get recent activity (last 5 rentals)
+// Sync session with database - if there's an active rental in DB but not in session, set it
+// This fixes the issue where session was lost but rental exists
+if ($active && empty($_SESSION['active_rental_id'])) {
+    $_SESSION['active_rental_id'] = $active['rental_id'];
+}
+
+// Get recent activity (combined rentals + penalties)
 try {
+    // Get rentals
     $stmt = $pdo->prepare("
-      SELECT r.rental_id, r.start_time, r.end_time, r.status, b.bike_name, b.bike_type,
-             COALESCE(p.amount, 0) as amount
+      SELECT 
+        'rental' as activity_type,
+        r.rental_id,
+        r.start_time as activity_date,
+        r.status,
+        b.bike_name,
+        b.bike_type,
+        COALESCE(pay.amount, 0) as amount,
+        0 as penalty_amount
       FROM rentals r
       JOIN bikes b ON b.bike_id = r.bike_id
-      LEFT JOIN payments p ON p.rental_id = r.rental_id
+      LEFT JOIN payments pay ON pay.rental_id = r.rental_id
       WHERE r.student_id=?
-      ORDER BY r.start_time DESC
+      
+      UNION ALL
+      
+      SELECT 
+        'penalty' as activity_type,
+        r.rental_id,
+        pen.created_at as activity_date,
+        pen.status,
+        b.bike_name,
+        b.bike_type,
+        0 as amount,
+        pen.amount as penalty_amount
+      FROM penalties pen
+      JOIN rentals r ON r.rental_id = pen.rental_id
+      JOIN bikes b ON b.bike_id = r.bike_id
+      WHERE r.student_id=?
+      
+      ORDER BY activity_date DESC
       LIMIT 5
     ");
-    $stmt->execute([$student_id]);
+    $stmt->execute([$student_id, $student_id]);
     $recentActivity = $stmt->fetchAll();
 } catch (Exception $e) {
     $recentActivity = [];
@@ -164,7 +195,6 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
         <!-- Sign Out -->
         <div class="sidebar-footer">
             <button class="logout-btn" onclick="showLogoutModal()">
-                <span>🚪</span>
                 <span>Sign out</span>
             </button>
         </div>
@@ -188,7 +218,20 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
         <div class="dashboard-content">
             <!-- Left Column -->
             <div class="content-left">
-                <!-- Available Bikes Card - Featured -->
+                <?php if ($active): ?>
+                    <!-- Active Rental Card - Most Important -->
+                    <div class="current-rental-card">
+                        <div class="rental-badge">
+                            <span class="pulse"></span>
+                            Active Rental
+                        </div>
+                        <h4><?= htmlspecialchars($active['bike_name']) ?></h4>
+                        <p class="rental-time">Due: <?= date('g:i A', strtotime($active['expected_return_time'])) ?></p>
+                        <a href="active-rental.php" class="rental-link">View Details →</a>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Available Bikes Card -->
                 <div class="featured-card">
                     <div class="featured-header">
                         <span class="featured-label">Available Bikes</span>
@@ -196,16 +239,10 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     </div>
                     <div class="featured-value"><?= $availableBikes ?></div>
                     <div class="featured-subtitle">Ready to rent</div>
-                    
-                    <div class="progress-section">
-                        <div class="progress-label">
-                            <span>Availability</span>
-                            <span><?= $totalBikes > 0 ? round(($availableBikes / $totalBikes) * 100) : 0 ?>%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: <?= $totalBikes > 0 ? round(($availableBikes / $totalBikes) * 100) : 0 ?>%"></div>
-                        </div>
-                    </div>
+
+                    <a href="available-bikes.php" class="rent-now-btn">
+                        <span>🚲</span> Rent a Bike
+                    </a>
                 </div>
 
                 <!-- Stats Row -->
@@ -234,20 +271,35 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     </div>
                     <div class="activity-list">
                         <?php if (count($recentActivity) > 0): ?>
-                            <?php foreach (array_slice($recentActivity, 0, 3) as $activity): ?>
+                            <?php foreach (array_slice($recentActivity, 0, 4) as $activity): ?>
                                 <div class="activity-row">
-                                    <div class="activity-icon-wrap">
-                                        <span><?= $activity['bike_type'] === 'mountain' ? '🚵' : '🚲' ?></span>
+                                    <div class="activity-icon-wrap"
+                                        style="<?= $activity['activity_type'] === 'penalty' ? 'background: #fee2e2;' : '' ?>">
+                                        <?php if ($activity['activity_type'] === 'penalty'): ?>
+                                            <span>⚠️</span>
+                                        <?php else: ?>
+                                            <span><?= $activity['bike_type'] === 'mountain' ? '🚵' : '🚲' ?></span>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="activity-details">
-                                        <span class="activity-name"><?= htmlspecialchars($activity['bike_name']) ?></span>
-                                        <span class="activity-date"><?= date('M j, Y \a\t g:i A', strtotime($activity['start_time'])) ?></span>
+                                        <?php if ($activity['activity_type'] === 'penalty'): ?>
+                                            <span class="activity-name" style="color: #dc2626;">Penalty -
+                                                <?= htmlspecialchars($activity['bike_name']) ?></span>
+                                        <?php else: ?>
+                                            <span class="activity-name"><?= htmlspecialchars($activity['bike_name']) ?></span>
+                                        <?php endif; ?>
+                                        <span
+                                            class="activity-date"><?= date('M j, Y \a\t g:i A', strtotime($activity['activity_date'])) ?></span>
                                     </div>
                                     <div class="activity-amount">
-                                        <?php if ($activity['amount'] > 0): ?>
+                                        <?php if ($activity['activity_type'] === 'penalty'): ?>
+                                            <span style="color: #dc2626; font-weight: 600;">-RM
+                                                <?= number_format($activity['penalty_amount'], 2) ?></span>
+                                        <?php elseif ($activity['amount'] > 0): ?>
                                             RM <?= number_format($activity['amount'], 2) ?>
                                         <?php else: ?>
-                                            <span class="status-badge <?= $activity['status'] ?>"><?= ucfirst($activity['status']) ?></span>
+                                            <span
+                                                class="status-badge <?= $activity['status'] ?>"><?= ucfirst($activity['status']) ?></span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -280,25 +332,25 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                             </div>
                             <div class="chart-legend">
                                 <?php if ($mountainCount > 0): ?>
-                                <div class="legend-item">
-                                    <span class="legend-color mountain"></span>
-                                    <span class="legend-text">Mountain</span>
-                                    <span class="legend-value"><?= $mountainPct ?>%</span>
-                                </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color mountain"></span>
+                                        <span class="legend-text">Mountain</span>
+                                        <span class="legend-value"><?= $mountainPct ?>%</span>
+                                    </div>
                                 <?php endif; ?>
                                 <?php if ($cityCount > 0): ?>
-                                <div class="legend-item">
-                                    <span class="legend-color city"></span>
-                                    <span class="legend-text">City</span>
-                                    <span class="legend-value"><?= $cityPct ?>%</span>
-                                </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color city"></span>
+                                        <span class="legend-text">City</span>
+                                        <span class="legend-value"><?= $cityPct ?>%</span>
+                                    </div>
                                 <?php endif; ?>
                                 <?php if ($otherCount > 0): ?>
-                                <div class="legend-item">
-                                    <span class="legend-color other"></span>
-                                    <span class="legend-text">Other</span>
-                                    <span class="legend-value"><?= $otherPct ?>%</span>
-                                </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color other"></span>
+                                        <span class="legend-text">Other</span>
+                                        <span class="legend-value"><?= $otherPct ?>%</span>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -332,18 +384,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     </div>
                 </div>
 
-                <?php if ($active): ?>
-                <!-- Current Rental -->
-                <div class="current-rental-card">
-                    <div class="rental-badge">
-                        <span class="pulse"></span>
-                        Active Rental
-                    </div>
-                    <h4><?= htmlspecialchars($active['bike_name']) ?></h4>
-                    <p class="rental-time">Due: <?= date('g:i A', strtotime($active['expected_return_time'])) ?></p>
-                    <a href="active-rental.php" class="rental-link">View Details →</a>
-                </div>
-                <?php endif; ?>
+
             </div>
         </div>
     </main>
@@ -351,7 +392,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
     <!-- Logout Confirmation Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">🚪</div>
+            <div class="modal-icon">⚠️</div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">
@@ -367,23 +408,23 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
             const mountainPct = <?= $mountainPct ?>;
             const cityPct = <?= $cityPct ?>;
             const otherPct = <?= $otherPct ?>;
-            
+
             const chart = document.getElementById('bikeTypeChart');
             if (chart && (mountainPct + cityPct + otherPct) > 0) {
                 const mountainDeg = (mountainPct / 100) * 360;
                 const cityDeg = (cityPct / 100) * 360;
                 const otherDeg = (otherPct / 100) * 360;
-                
+
                 let gradient = 'conic-gradient(';
                 let currentDeg = 0;
-                
+
                 if (mountainPct > 0) {
                     gradient += `#10b981 ${currentDeg}deg ${currentDeg + mountainDeg}deg`;
                     currentDeg += mountainDeg;
                     if (cityPct > 0 || otherPct > 0) gradient += ', ';
                 }
                 if (cityPct > 0) {
-                    gradient += `#3b82f6 ${currentDeg}deg ${currentDeg + cityDeg}deg`;
+                    gradient += `#f59e0b ${currentDeg}deg ${currentDeg + cityDeg}deg`;
                     currentDeg += cityDeg;
                     if (otherPct > 0) gradient += ', ';
                 }
@@ -391,7 +432,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     gradient += `#8b5cf6 ${currentDeg}deg ${currentDeg + otherDeg}deg`;
                 }
                 gradient += ')';
-                
+
                 chart.style.background = gradient;
             }
         }
@@ -412,9 +453,9 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
         }
 
         // Run on load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             drawPieChart();
-            
+
             // Animate featured value
             const featuredValue = document.querySelector('.featured-value');
             if (featuredValue) {
@@ -437,11 +478,11 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
             window.location.href = 'logout.php';
         }
 
-        document.getElementById('logoutModal').addEventListener('click', function(e) {
+        document.getElementById('logoutModal').addEventListener('click', function (e) {
             if (e.target === this) hideLogoutModal();
         });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') hideLogoutModal();
         });
     </script>
