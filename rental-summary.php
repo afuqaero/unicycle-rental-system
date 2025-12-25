@@ -28,6 +28,11 @@ $stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=?");
 $stmt->execute([$student_id]);
 $totalRentals = (int) $stmt->fetchColumn();
 
+// Get profile picture
+$stmt = $pdo->prepare("SELECT profile_pic FROM students WHERE student_id=?");
+$stmt->execute([$student_id]);
+$profile_pic = $stmt->fetchColumn() ?: null;
+
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=? AND status IN ('completed','late')");
 $stmt->execute([$student_id]);
 $completed = (int) $stmt->fetchColumn();
@@ -96,7 +101,8 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
   <meta charset="UTF-8">
   <title>Rental Summary - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Rental Summary Page Specific Styles */
     .summary-stats {
@@ -491,7 +497,12 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
     </div>
 
     <div class="user-section">
-      <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+      <div class="user-avatar">
+        <?php if ($profile_pic && file_exists('assets/uploads/' . $profile_pic)): ?>
+              <img src="assets/uploads/<?= htmlspecialchars($profile_pic) ?>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+        <?php else: ?>
+              <?= htmlspecialchars($initials) ?>
+        <?php endif; ?></div>
       <div class="user-welcome">
         <span class="welcome-label">Welcome back,</span>
         <span class="user-name"><?= htmlspecialchars($student_name) ?></span>
@@ -506,20 +517,24 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item active">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -536,9 +551,6 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
     <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Rental Summary</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>
@@ -550,22 +562,22 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
       <!-- Stats -->
       <div class="summary-stats">
         <div class="summary-stat">
-          <div class="stat-icon blue">📊</div>
+          <div class="stat-icon blue"><i class="fas fa-chart-simple"></i></div>
           <div class="stat-value"><?= $totalRentals ?></div>
           <div class="stat-label">Total Rentals</div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon green">✓</div>
+          <div class="stat-icon green"><i class="fas fa-check"></i></div>
           <div class="stat-value"><?= $completed ?></div>
           <div class="stat-label">Completed</div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon orange">🚴</div>
+          <div class="stat-icon orange"><i class="fas fa-person-biking"></i></div>
           <div class="stat-value"><?= $activeCount ?></div>
           <div class="stat-label">Active</div>
         </div>
         <div class="summary-stat">
-          <div class="stat-icon red">💰</div>
+          <div class="stat-icon red"><i class="fas fa-coins"></i></div>
           <div class="stat-value">RM <?= number_format($totalPenalties, 2) ?></div>
           <div class="stat-label">Unpaid Penalties</div>
         </div>
@@ -574,7 +586,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
       <?php if ($totalPenalties > 0): ?>
         <!-- Penalty Alert -->
         <div class="penalty-alert">
-          <div class="alert-icon">⚠️</div>
+          <div class="alert-icon"><i class="fas fa-exclamation-triangle" style="color: white;"></i></div>
           <div class="alert-content">
             <h4>You have unpaid penalties</h4>
             <p>Please settle your penalties to continue renting bikes.</p>
@@ -585,7 +597,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
 
       <!-- Penalty Rules -->
       <div class="rules-card">
-        <h4>📋 Penalty Rules</h4>
+        <h4><i class="fas fa-clipboard-list"></i> Penalty Rules</h4>
         <div class="rules-list">
           <div class="rule-item">
             <span>Grace period:</span>
@@ -609,7 +621,8 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
 
       <?php if ($active): ?>
         <div class="active-rental-card">
-          <div class="rental-icon"><?= $active['bike_type'] === 'mountain' ? '🚵' : '🚲' ?></div>
+          <div class="rental-icon"><i
+              class="fas <?= $active['bike_type'] === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i></div>
           <div class="rental-info">
             <h4><?= htmlspecialchars($active['bike_name']) ?></h4>
             <p>Started: <?= date('M j, Y \a\t g:i A', strtotime($active['start_time'])) ?></p>
@@ -619,7 +632,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
         </div>
       <?php else: ?>
         <div class="no-rental-card">
-          <div class="no-rental-icon">🚲</div>
+          <div class="no-rental-icon"><i class="fas fa-bicycle"></i></div>
           <h4>No Active Rental</h4>
           <p>You don't have any ongoing rentals right now.</p>
           <a href="available-bikes.php" class="rent-btn">Rent a Bike</a>
@@ -634,7 +647,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
       <div class="history-card">
         <?php if (empty($history)): ?>
           <div class="empty-history">
-            <div class="empty-icon">📭</div>
+            <div class="empty-icon"><i class="fas fa-inbox"></i></div>
             <h4>No rental history yet</h4>
             <p>Your completed rentals will appear here.</p>
           </div>
@@ -661,7 +674,9 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
                 <tr>
                   <td>
                     <div class="bike-cell">
-                      <div class="bike-icon"><?= $bikeIcon ?></div>
+                      <div class="bike-icon"><i
+                          class="fas <?= ($row['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+                      </div>
                       <span><?= htmlspecialchars($row['bike_name']) ?></span>
                     </div>
                   </td>
@@ -696,7 +711,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">⚠️</div>
+      <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

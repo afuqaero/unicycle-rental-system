@@ -58,7 +58,8 @@ $currentDate = date('l, F j, Y');
   <meta charset="UTF-8">
   <title>Payment - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Payment Page Styles */
     .payment-container {
@@ -251,20 +252,24 @@ $currentDate = date('l, F j, Y');
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -281,9 +286,6 @@ $currentDate = date('l, F j, Y');
     <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Payment</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>
@@ -294,7 +296,9 @@ $currentDate = date('l, F j, Y');
       <div class="payment-container">
         <div class="payment-card">
           <div class="payment-header">
-            <div class="success-icon"><?= $bikeIcon ?></div>
+            <div class="success-icon"><i
+                class="fas <?= ($bike['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+            </div>
             <h2><?= htmlspecialchars($bike['bike_name']) ?></h2>
             <p>Complete your payment to start riding</p>
           </div>
@@ -329,12 +333,12 @@ $currentDate = date('l, F j, Y');
               <input type="hidden" name="hours" value="<?= (int) $hours ?>">
               <input type="hidden" name="amount" value="<?= htmlspecialchars((string) $amount) ?>">
               <button type="submit" class="pay-btn">
-                <span>💳</span> Pay RM <?= number_format($amount, 2) ?>
+                <span><i class="fas fa-credit-card"></i></span> Pay RM <?= number_format($amount, 2) ?>
               </button>
             </form>
 
             <div class="security-note">
-              <span>🔒</span> Secure simulated payment
+              <span><i class="fas fa-lock"></i></span> Secure simulated payment
             </div>
           </div>
         </div>
@@ -345,7 +349,7 @@ $currentDate = date('l, F j, Y');
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">⚠️</div>
+      <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

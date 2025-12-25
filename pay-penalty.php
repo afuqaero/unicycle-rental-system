@@ -49,7 +49,7 @@ $currentDate = date('l, F j, Y');
   <meta charset="UTF-8">
   <title>Pay Penalty - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
   <style>
     /* Pay Penalty Styles */
     .penalty-total {
@@ -246,20 +246,24 @@ $currentDate = date('l, F j, Y');
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item active">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -276,9 +280,6 @@ $currentDate = date('l, F j, Y');
     <div class="header-banner" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Pay Penalty</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>

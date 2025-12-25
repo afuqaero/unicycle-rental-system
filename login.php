@@ -13,16 +13,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
     if (empty($email) || empty($password)) {
         $error = 'Please fill in all fields.';
     } else {
-        // Check against students table
-        $stmt = $pdo->prepare("SELECT student_id, name, email, password FROM students WHERE email = ? OR student_staff_id = ?");
+        // Check against students table (includes role for admin detection)
+        $stmt = $pdo->prepare("SELECT student_id, name, email, password, role FROM students WHERE email = ? OR student_staff_id = ?");
         $stmt->execute([$email, $email]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Login successful
+            // Login successful - set common session variables
             $_SESSION['student_id'] = $user['student_id'];
             $_SESSION['student_name'] = $user['name'];
             $_SESSION['logged_in'] = true;
+            $_SESSION['user_role'] = $user['role'];
+
+            // Role-based routing: Admin/Super Admin go to admin dashboard
+            if ($user['role'] === 'admin' || $user['role'] === 'super_admin') {
+                $_SESSION['is_admin'] = true;
+                $_SESSION['admin_role'] = $user['role'];
+                header('Location: admin/dashboard.php');
+                exit;
+            }
+
+            // Regular users (student/staff) go to normal dashboard
             header('Location: dashboard.php');
             exit;
         } else {

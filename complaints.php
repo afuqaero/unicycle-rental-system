@@ -22,6 +22,11 @@ $stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=?");
 $stmt->execute([$student_id]);
 $totalRentals = (int) $stmt->fetchColumn();
 
+// Get profile picture
+$stmt = $pdo->prepare("SELECT profile_pic FROM students WHERE student_id=?");
+$stmt->execute([$student_id]);
+$profile_pic = $stmt->fetchColumn() ?: null;
+
 // submit complaint
 $error = "";
 $success = false;
@@ -82,7 +87,8 @@ $currentDate = date('l, F j, Y');
     <meta charset="UTF-8">
     <title>Complaints - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=7">
+    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* Complaints Page Specific Styles */
         .complaints-header {
@@ -443,7 +449,14 @@ $currentDate = date('l, F j, Y');
         </div>
 
         <div class="user-section">
-            <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+            <div class="user-avatar">
+                <?php if ($profile_pic && file_exists('assets/uploads/' . $profile_pic)): ?>
+                    <img src="assets/uploads/<?= htmlspecialchars($profile_pic) ?>" alt="Profile"
+                        style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                <?php else: ?>
+                    <?= htmlspecialchars($initials) ?>
+                <?php endif; ?>
+            </div>
             <div class="user-welcome">
                 <span class="welcome-label">Welcome back,</span>
                 <span class="user-name"><?= htmlspecialchars($student_name) ?></span>
@@ -458,20 +471,24 @@ $currentDate = date('l, F j, Y');
 
         <nav class="sidebar-nav">
             <a href="dashboard.php" class="nav-item">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
                 <span>Dashboard</span>
             </a>
             <a href="available-bikes.php" class="nav-item">
-                <span class="nav-icon">🚲</span>
+                <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
                 <span>Available Bikes</span>
             </a>
             <a href="rental-summary.php" class="nav-item">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
                 <span>Rental Summary</span>
             </a>
             <a href="complaints.php" class="nav-item active">
-                <span class="nav-icon">💬</span>
+                <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
                 <span>Complaints</span>
+            </a>
+            <a href="settings.php" class="nav-item">
+                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                <span>Settings</span>
             </a>
         </nav>
 
@@ -488,9 +505,6 @@ $currentDate = date('l, F j, Y');
         <div class="header-banner">
             <div class="banner-pattern"></div>
             <div class="banner-content">
-                <div class="banner-dots">
-                    <span></span><span></span><span></span><span></span>
-                </div>
                 <h1>Complaints</h1>
                 <p class="banner-date"><?= $currentDate ?></p>
             </div>
@@ -503,40 +517,40 @@ $currentDate = date('l, F j, Y');
             <div class="complaints-header">
                 <h2>Your Complaints</h2>
                 <button class="new-complaint-btn" onclick="openComplaintModal()">
-                    <span>💬</span> Lodge Complaint
+                    <span><i class="fas fa-plus"></i></span> Lodge Complaint
                 </button>
             </div>
 
             <?php if ($success): ?>
                 <div class="success-message">
-                    <span>✅</span> Your complaint has been submitted successfully!
+                    <span><i class="fas fa-check-circle"></i></span> Your complaint has been submitted successfully!
                 </div>
             <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="error-message">
-                    <span>❌</span> <?= htmlspecialchars($error) ?>
+                    <span><i class="fas fa-times-circle"></i></span> <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
             <!-- Stats -->
             <div class="complaints-stats">
                 <div class="complaint-stat">
-                    <div class="stat-icon total">📝</div>
+                    <div class="stat-icon total"><i class="fas fa-file-lines"></i></div>
                     <div class="stat-info">
                         <div class="stat-value"><?= $totalComplaints ?></div>
                         <div class="stat-label">Total Complaints</div>
                     </div>
                 </div>
                 <div class="complaint-stat">
-                    <div class="stat-icon open">⏳</div>
+                    <div class="stat-icon open"><i class="fas fa-hourglass-half"></i></div>
                     <div class="stat-info">
                         <div class="stat-value"><?= $openComplaints ?></div>
                         <div class="stat-label">Open</div>
                     </div>
                 </div>
                 <div class="complaint-stat">
-                    <div class="stat-icon resolved">✓</div>
+                    <div class="stat-icon resolved"><i class="fas fa-check"></i></div>
                     <div class="stat-info">
                         <div class="stat-value"><?= $resolvedComplaints ?></div>
                         <div class="stat-label">Resolved</div>
@@ -547,11 +561,11 @@ $currentDate = date('l, F j, Y');
             <!-- Complaints List -->
             <?php if (empty($complaints)): ?>
                 <div class="empty-complaints">
-                    <div class="empty-icon">💬</div>
+                    <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
                     <h4>No complaints yet</h4>
                     <p>You haven't submitted any complaints. Lodge one if you encounter any issues.</p>
                     <button class="new-complaint-btn" onclick="openComplaintModal()">
-                        <span>💬</span> Lodge Complaint
+                        <span><i class="fas fa-plus"></i></span> Lodge Complaint
                     </button>
                 </div>
             <?php else: ?>
@@ -562,12 +576,14 @@ $currentDate = date('l, F j, Y');
                                 <div class="complaint-info">
                                     <h4>Complaint #<?= htmlspecialchars($c['complaint_code']) ?></h4>
                                     <div class="complaint-meta">
-                                        <span>🚲 <?= htmlspecialchars($c['bike_name'] ?? 'General') ?></span>
-                                        <span>📅 <?= date('M j, Y \a\t g:i A', strtotime($c['created_at'])) ?></span>
+                                        <span><i class="fas fa-bicycle"></i>
+                                            <?= htmlspecialchars($c['bike_name'] ?? 'General') ?></span>
+                                        <span><i class="fas fa-calendar"></i>
+                                            <?= date('M j, Y \a\t g:i A', strtotime($c['created_at'])) ?></span>
                                     </div>
                                 </div>
                                 <span class="complaint-status <?= $c['status'] ?>">
-                                    <?= $c['status'] === 'resolved' ? '✓ Resolved' : '⏳ Open' ?>
+                                    <?= $c['status'] === 'resolved' ? '<i class="fas fa-check"></i> Resolved' : '<i class="fas fa-hourglass-half"></i> Open' ?>
                                 </span>
                             </div>
                             <div class="complaint-card-body">
@@ -584,7 +600,7 @@ $currentDate = date('l, F j, Y');
     <!-- Complaint Modal -->
     <div class="complaint-modal" id="complaintModal">
         <div class="complaint-modal-box">
-            <h3>💬 Lodge a Complaint</h3>
+            <h3><i class="fas fa-comment-dots"></i> Lodge a Complaint</h3>
             <form method="post" action="complaints.php">
                 <div class="form-group">
                     <label>Select Rental (Optional)</label>
@@ -613,7 +629,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">⚠️</div>
+            <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

@@ -1,7 +1,7 @@
 -- ============================================
--- UniCycle Unified Database
--- Merged from bike_admin.sql + bike_rental.sql
--- Generated: 2025-12-24
+-- UniCycle Database for InfinityFree Hosting
+-- Import this into your InfinityFree database
+-- NOTE: Database is already created by InfinityFree
 -- ============================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -14,16 +14,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 -- ============================================
--- Database: unicycle_db
--- ============================================
-CREATE DATABASE IF NOT EXISTS `unicycle_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `unicycle_db`;
-
--- ============================================
 -- Table: admin
 -- Admin users for admin panel
 -- ============================================
-CREATE TABLE `admin` (
+CREATE TABLE IF NOT EXISTS `admin` (
     `admin_id` INT(11) NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(50) NOT NULL,
     `email` VARCHAR(100) DEFAULT NULL,
@@ -42,7 +36,7 @@ INSERT INTO `admin` (`admin_id`, `username`, `email`, `password`) VALUES
 -- Table: students
 -- Students/Staff users (for login/register)
 -- ============================================
-CREATE TABLE `students` (
+CREATE TABLE IF NOT EXISTS `students` (
     `student_id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
@@ -50,6 +44,7 @@ CREATE TABLE `students` (
     `student_staff_id` VARCHAR(30) DEFAULT NULL COMMENT 'Matric No or Staff ID',
     `role` ENUM('student', 'staff', 'admin', 'super_admin') NOT NULL DEFAULT 'student',
     `phone` VARCHAR(20) DEFAULT NULL,
+    `profile_pic` VARCHAR(255) DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`student_id`),
     UNIQUE KEY `email` (`email`),
@@ -65,7 +60,7 @@ INSERT INTO `students` (`student_id`, `name`, `email`, `password`, `student_staf
 -- Table: bikes
 -- Bicycle inventory
 -- ============================================
-CREATE TABLE `bikes` (
+CREATE TABLE IF NOT EXISTS `bikes` (
     `bike_id` INT(11) NOT NULL AUTO_INCREMENT,
     `bike_code` VARCHAR(30) NOT NULL,
     `bike_name` VARCHAR(80) NOT NULL,
@@ -100,7 +95,7 @@ INSERT INTO `bikes` (`bike_id`, `bike_code`, `bike_name`, `bike_type`, `status`,
 -- Table: rentals
 -- Rental records
 -- ============================================
-CREATE TABLE `rentals` (
+CREATE TABLE IF NOT EXISTS `rentals` (
     `rental_id` INT(11) NOT NULL AUTO_INCREMENT,
     `rental_code` VARCHAR(30) NOT NULL,
     `student_id` INT(11) NOT NULL,
@@ -120,18 +115,11 @@ CREATE TABLE `rentals` (
     KEY `fk_rental_bike` (`bike_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample rentals data
-INSERT INTO `rentals` (`rental_id`, `rental_code`, `student_id`, `bike_id`, `start_time`, `expected_return_time`, `return_time`, `status`, `hourly_rate`, `planned_hours`) VALUES
-(1, 'RENT589993', 1, 5, '2025-12-15 12:47:07', '2025-12-15 20:47:07', '2025-12-15 12:47:22', 'completed', 3.00, 8),
-(2, 'RENT083778', 1, 7, '2025-12-16 16:51:16', '2025-12-16 17:51:16', '2025-12-16 16:51:26', 'completed', 3.00, 1),
-(3, 'RENT696139', 1, 2, '2025-12-17 04:11:18', '2025-12-17 05:11:18', NULL, 'active', 3.00, 1),
-(4, 'RENT640553', 1, 5, '2025-12-17 04:18:06', '2025-12-17 12:18:06', NULL, 'active', 3.00, 8);
-
 -- ============================================
 -- Table: payments
 -- Payment records
 -- ============================================
-CREATE TABLE `payments` (
+CREATE TABLE IF NOT EXISTS `payments` (
     `payment_id` INT(11) NOT NULL AUTO_INCREMENT,
     `rental_id` INT(11) NOT NULL,
     `amount` DECIMAL(8,2) NOT NULL,
@@ -142,16 +130,11 @@ CREATE TABLE `payments` (
     KEY `fk_payment_rental` (`rental_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample payments data
-INSERT INTO `payments` (`payment_id`, `rental_id`, `amount`, `method`, `status`, `paid_at`) VALUES
-(1, 1, 24.00, 'cashless', 'paid', '2025-12-15 19:47:11'),
-(2, 2, 3.00, 'cashless', 'paid', '2025-12-16 23:51:17');
-
 -- ============================================
 -- Table: penalties
 -- Late return penalties
 -- ============================================
-CREATE TABLE `penalties` (
+CREATE TABLE IF NOT EXISTS `penalties` (
     `penalty_id` INT(11) NOT NULL AUTO_INCREMENT,
     `rental_id` INT(11) NOT NULL,
     `minutes_late` INT(11) NOT NULL DEFAULT 0,
@@ -166,7 +149,7 @@ CREATE TABLE `penalties` (
 -- Table: complaints
 -- User complaints
 -- ============================================
-CREATE TABLE `complaints` (
+CREATE TABLE IF NOT EXISTS `complaints` (
     `complaint_id` INT(11) NOT NULL AUTO_INCREMENT,
     `complaint_code` VARCHAR(30) NOT NULL,
     `student_id` INT(11) NOT NULL,
@@ -180,15 +163,11 @@ CREATE TABLE `complaints` (
     KEY `fk_complaint_rental` (`rental_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample complaints data
-INSERT INTO `complaints` (`complaint_id`, `complaint_code`, `student_id`, `rental_id`, `message`, `status`) VALUES
-(1, 'COMP214158', 1, 1, 'There is no bell on the bike', 'open');
-
 -- ============================================
 -- Table: bike_feedback
 -- Post-return bike condition feedback
 -- ============================================
-CREATE TABLE `bike_feedback` (
+CREATE TABLE IF NOT EXISTS `bike_feedback` (
     `feedback_id` INT(11) NOT NULL AUTO_INCREMENT,
     `rental_id` INT(11) NOT NULL,
     `bike_id` INT(11) NOT NULL,
@@ -204,51 +183,31 @@ CREATE TABLE `bike_feedback` (
 
 -- ============================================
 -- Foreign Key Constraints
--- ALL use ON DELETE CASCADE ON UPDATE CASCADE
--- for proper synchronization across tables
 -- ============================================
 
 -- Rentals constraints
--- Deleting a student or bike will delete their rentals
 ALTER TABLE `rentals`
     ADD CONSTRAINT `fk_rental_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_rental_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Payments constraints
--- Deleting a rental will delete its payments
 ALTER TABLE `payments`
     ADD CONSTRAINT `fk_payment_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Penalties constraints
--- Deleting a rental will delete its penalties
 ALTER TABLE `penalties`
     ADD CONSTRAINT `fk_penalty_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Complaints constraints
--- Deleting a student will delete their complaints
--- Deleting a rental will delete related complaints
 ALTER TABLE `complaints`
     ADD CONSTRAINT `fk_complaint_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_complaint_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Bike feedback constraints
--- Deleting a rental, bike, or student will delete related feedback
 ALTER TABLE `bike_feedback`
     ADD CONSTRAINT `fk_feedback_rental` FOREIGN KEY (`rental_id`) REFERENCES `rentals` (`rental_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_feedback_bike` FOREIGN KEY (`bike_id`) REFERENCES `bikes` (`bike_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_feedback_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- ============================================
--- Set AUTO_INCREMENT values
--- ============================================
-ALTER TABLE `admin` MODIFY `admin_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-ALTER TABLE `students` MODIFY `student_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-ALTER TABLE `bikes` MODIFY `bike_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-ALTER TABLE `rentals` MODIFY `rental_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-ALTER TABLE `payments` MODIFY `payment_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-ALTER TABLE `penalties` MODIFY `penalty_id` INT(11) NOT NULL AUTO_INCREMENT;
-ALTER TABLE `complaints` MODIFY `complaint_id` INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-ALTER TABLE `bike_feedback` MODIFY `feedback_id` INT(11) NOT NULL AUTO_INCREMENT;
 
 COMMIT;
 

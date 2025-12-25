@@ -11,11 +11,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 $student_id = $_SESSION['student_id'];
 $student_name = $_SESSION['student_name'] ?? 'User';
 
-// Get user's role from database
-$stmt = $pdo->prepare("SELECT role FROM students WHERE student_id = ?");
+// Get user's role and profile pic from database
+$stmt = $pdo->prepare("SELECT role, profile_pic FROM students WHERE student_id = ?");
 $stmt->execute([$student_id]);
 $user = $stmt->fetch();
 $user_role = $user['role'] ?? 'student';
+$profile_pic = $user['profile_pic'] ?? null;
 
 // Counts
 $availableBikes = (int) $pdo->query("SELECT COUNT(*) FROM bikes WHERE status='available'")->fetchColumn();
@@ -142,7 +143,9 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
     <meta charset="UTF-8">
     <title>Dashboard - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=6">
+    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -159,7 +162,14 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
 
         <!-- User Profile - Top of Sidebar -->
         <div class="user-section">
-            <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+            <div class="user-avatar">
+                <?php if ($profile_pic && file_exists('assets/uploads/' . $profile_pic)): ?>
+                    <img src="assets/uploads/<?= htmlspecialchars($profile_pic) ?>" alt="Profile"
+                        style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                <?php else: ?>
+                    <?= htmlspecialchars($initials) ?>
+                <?php endif; ?>
+            </div>
             <div class="user-welcome">
                 <span class="welcome-label">Welcome back,</span>
                 <span class="user-name"><?= htmlspecialchars($student_name) ?></span>
@@ -175,20 +185,24 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
         <!-- Navigation -->
         <nav class="sidebar-nav">
             <a href="dashboard.php" class="nav-item active">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
                 <span>Dashboard</span>
             </a>
             <a href="available-bikes.php" class="nav-item">
-                <span class="nav-icon">🚲</span>
+                <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
                 <span>Available Bikes</span>
             </a>
             <a href="rental-summary.php" class="nav-item">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
                 <span>Rental Summary</span>
             </a>
             <a href="complaints.php" class="nav-item">
-                <span class="nav-icon">💬</span>
+                <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
                 <span>Complaints</span>
+            </a>
+            <a href="settings.php" class="nav-item">
+                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                <span>Settings</span>
             </a>
         </nav>
 
@@ -206,9 +220,6 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
         <div class="header-banner">
             <div class="banner-pattern"></div>
             <div class="banner-content">
-                <div class="banner-dots">
-                    <span></span><span></span><span></span><span></span>
-                </div>
                 <h1>Dashboard</h1>
                 <p class="banner-date"><?= $currentDate ?></p>
             </div>
@@ -241,21 +252,21 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     <div class="featured-subtitle">Ready to rent</div>
 
                     <a href="available-bikes.php" class="rent-now-btn">
-                        <span>🚲</span> Rent a Bike
+                        <span><i class="fas fa-bicycle"></i></span> Rent a Bike
                     </a>
                 </div>
 
                 <!-- Stats Row -->
                 <div class="stats-row">
                     <div class="mini-stat-card">
-                        <div class="mini-stat-icon blue">🚴</div>
+                        <div class="mini-stat-icon blue"><i class="fas fa-person-biking"></i></div>
                         <div class="mini-stat-info">
                             <span class="mini-stat-label">Your Rides</span>
                             <span class="mini-stat-value"><?= $totalRentals ?></span>
                         </div>
                     </div>
                     <div class="mini-stat-card">
-                        <div class="mini-stat-icon green">✓</div>
+                        <div class="mini-stat-icon green"><i class="fas fa-check"></i></div>
                         <div class="mini-stat-info">
                             <span class="mini-stat-label">Available</span>
                             <span class="mini-stat-value"><?= $availableBikes ?></span>
@@ -276,9 +287,10 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                                     <div class="activity-icon-wrap"
                                         style="<?= $activity['activity_type'] === 'penalty' ? 'background: #fee2e2;' : '' ?>">
                                         <?php if ($activity['activity_type'] === 'penalty'): ?>
-                                            <span>⚠️</span>
+                                            <span><i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i></span>
                                         <?php else: ?>
-                                            <span><?= $activity['bike_type'] === 'mountain' ? '🚵' : '🚲' ?></span>
+                                            <span><i
+                                                    class="fas <?= $activity['bike_type'] === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i></span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="activity-details">
@@ -306,7 +318,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                             <?php endforeach; ?>
                         <?php else: ?>
                             <div class="empty-activity">
-                                <span class="empty-icon">📭</span>
+                                <span class="empty-icon"><i class="fas fa-inbox"></i></span>
                                 <p>No activity yet</p>
                             </div>
                         <?php endif; ?>
@@ -356,7 +368,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                         </div>
                     <?php else: ?>
                         <div class="chart-empty">
-                            <div class="chart-empty-icon">📊</div>
+                            <div class="chart-empty-icon"><i class="fas fa-chart-pie"></i></div>
                             <p>No data yet</p>
                             <span>Start renting to see your preferences</span>
                         </div>
@@ -368,14 +380,14 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                     <h3>Quick Actions</h3>
                     <div class="quick-actions-list">
                         <a href="available-bikes.php" class="action-card primary">
-                            <div class="action-icon-wrap">🚲</div>
+                            <div class="action-icon-wrap"><i class="fas fa-bicycle"></i></div>
                             <div class="action-text">
                                 <span class="action-title">Browse Bikes</span>
                                 <span class="action-desc">Find and rent available bikes</span>
                             </div>
                         </a>
                         <a href="rental-summary.php" class="action-card secondary">
-                            <div class="action-icon-wrap">📋</div>
+                            <div class="action-icon-wrap"><i class="fas fa-clock-rotate-left"></i></div>
                             <div class="action-text">
                                 <span class="action-title">Rental History</span>
                                 <span class="action-desc">View your past rentals</span>
@@ -392,7 +404,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
     <!-- Logout Confirmation Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">⚠️</div>
+            <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

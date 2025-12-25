@@ -60,7 +60,8 @@ $currentDate = date('l, F j, Y');
   <meta charset="UTF-8">
   <title>Rent Bike - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Rent Instructions Styles */
     .rent-container {
@@ -273,20 +274,24 @@ $currentDate = date('l, F j, Y');
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item active">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -303,9 +308,6 @@ $currentDate = date('l, F j, Y');
     <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Rent a Bike</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>
@@ -316,7 +318,9 @@ $currentDate = date('l, F j, Y');
       <div class="rent-container">
         <div class="rent-card">
           <div class="rent-header">
-            <div class="bike-icon"><?= $bikeIcon ?></div>
+            <div class="bike-icon"><i
+                class="fas <?= ($bike['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+            </div>
             <h2>Ready to Ride?</h2>
             <p>Review the steps before confirming</p>
           </div>
@@ -324,16 +328,19 @@ $currentDate = date('l, F j, Y');
           <div class="rent-body">
             <!-- Selected Bike -->
             <div class="selected-bike">
-              <div class="bike-icon-wrap"><?= $bikeIcon ?></div>
+              <div class="bike-icon-wrap"><i
+                  class="fas <?= ($bike['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+              </div>
               <div class="bike-info">
                 <h4><?= htmlspecialchars($bike['bike_name']) ?></h4>
-                <p>📍 <?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></p>
+                <p><i class="fas fa-location-dot"></i> <?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?>
+                </p>
               </div>
             </div>
 
             <!-- Instructions -->
             <div class="instructions-section">
-              <h3>📋 How It Works</h3>
+              <h3><i class="fas fa-clipboard-list"></i> How It Works</h3>
               <div class="step-list">
                 <div class="step-item">
                   <div class="step-number">1</div>
@@ -361,9 +368,9 @@ $currentDate = date('l, F j, Y');
 
             <!-- Buttons -->
             <div class="action-buttons">
-              <a href="available-bikes.php" class="back-btn">← Back</a>
+              <a href="available-bikes.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
               <a href="rent-confirm.php?bike_id=<?= (int) $bike['bike_id'] ?>" class="continue-btn">
-                Continue →
+                Continue <i class="fas fa-arrow-right"></i>
               </a>
             </div>
           </div>
@@ -375,7 +382,7 @@ $currentDate = date('l, F j, Y');
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">⚠️</div>
+      <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

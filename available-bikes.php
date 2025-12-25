@@ -22,6 +22,11 @@ $stmt = $pdo->prepare("SELECT COUNT(*) FROM rentals WHERE student_id=?");
 $stmt->execute([$student_id]);
 $totalRentals = (int) $stmt->fetchColumn();
 
+// Get profile picture
+$stmt = $pdo->prepare("SELECT profile_pic FROM students WHERE student_id=?");
+$stmt->execute([$student_id]);
+$profile_pic = $stmt->fetchColumn() ?: null;
+
 // unpaid penalties block renting
 $stmt = $pdo->prepare("
   SELECT COUNT(*)
@@ -76,7 +81,8 @@ $currentDate = date('l, F j, Y');
     <meta charset="UTF-8">
     <title>Available Bikes - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=7">
+    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* Available Bikes Page Specific Styles */
         .bikes-stats {
@@ -279,6 +285,13 @@ $currentDate = date('l, F j, Y');
             display: block;
         }
 
+        .bike-card-header .bike-type-img {
+            width: 120px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
         .bike-card-header .bike-status {
             position: absolute;
             top: 16px;
@@ -450,7 +463,14 @@ $currentDate = date('l, F j, Y');
 
         <!-- User Profile -->
         <div class="user-section">
-            <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+            <div class="user-avatar">
+                <?php if ($profile_pic && file_exists('assets/uploads/' . $profile_pic)): ?>
+                    <img src="assets/uploads/<?= htmlspecialchars($profile_pic) ?>" alt="Profile"
+                        style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                <?php else: ?>
+                    <?= htmlspecialchars($initials) ?>
+                <?php endif; ?>
+            </div>
             <div class="user-welcome">
                 <span class="welcome-label">Welcome back,</span>
                 <span class="user-name"><?= htmlspecialchars($student_name) ?></span>
@@ -466,20 +486,24 @@ $currentDate = date('l, F j, Y');
         <!-- Navigation -->
         <nav class="sidebar-nav">
             <a href="dashboard.php" class="nav-item">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
                 <span>Dashboard</span>
             </a>
             <a href="available-bikes.php" class="nav-item active">
-                <span class="nav-icon">🚲</span>
+                <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
                 <span>Available Bikes</span>
             </a>
             <a href="rental-summary.php" class="nav-item">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
                 <span>Rental Summary</span>
             </a>
             <a href="complaints.php" class="nav-item">
-                <span class="nav-icon">💬</span>
+                <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
                 <span>Complaints</span>
+            </a>
+            <a href="settings.php" class="nav-item">
+                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                <span>Settings</span>
             </a>
         </nav>
 
@@ -497,9 +521,6 @@ $currentDate = date('l, F j, Y');
         <div class="header-banner">
             <div class="banner-pattern"></div>
             <div class="banner-content">
-                <div class="banner-dots">
-                    <span></span><span></span><span></span><span></span>
-                </div>
                 <h1>Available Bikes</h1>
                 <p class="banner-date"><?= $currentDate ?></p>
             </div>
@@ -511,7 +532,7 @@ $currentDate = date('l, F j, Y');
             <?php if ($hasUnpaidPenalty): ?>
                 <!-- Penalty Warning -->
                 <div class="penalty-warning">
-                    <div class="warning-icon">⚠️</div>
+                    <div class="warning-icon"><i class="fas fa-exclamation-triangle" style="color: white;"></i></div>
                     <div class="warning-text">
                         <h4>Rental Blocked</h4>
                         <p>You have unpaid penalties. Please settle them before renting a bike.</p>
@@ -523,28 +544,28 @@ $currentDate = date('l, F j, Y');
             <!-- Stats Cards -->
             <div class="bikes-stats">
                 <div class="stat-card" onclick="filterBikes('all', this)" data-filter="all">
-                    <div class="stat-icon available">🚲</div>
+                    <div class="stat-icon available"><i class="fas fa-bicycle"></i></div>
                     <div class="stat-info">
                         <div class="stat-label">Total Bikes</div>
                         <div class="stat-value"><?= $totalBikes ?></div>
                     </div>
                 </div>
                 <div class="stat-card" onclick="filterBikes('available', this)" data-filter="available">
-                    <div class="stat-icon available">✓</div>
+                    <div class="stat-icon available"><i class="fas fa-check"></i></div>
                     <div class="stat-info">
                         <div class="stat-label">Available</div>
                         <div class="stat-value"><?= $availableCount ?></div>
                     </div>
                 </div>
                 <div class="stat-card" onclick="filterBikes('rented', this)" data-filter="rented">
-                    <div class="stat-icon rented">🔒</div>
+                    <div class="stat-icon rented"><i class="fas fa-lock"></i></div>
                     <div class="stat-info">
                         <div class="stat-label">Rented</div>
                         <div class="stat-value"><?= $rentedCount ?></div>
                     </div>
                 </div>
                 <div class="stat-card" onclick="filterBikes('maintenance', this)" data-filter="maintenance">
-                    <div class="stat-icon maintenance">🔧</div>
+                    <div class="stat-icon maintenance"><i class="fas fa-wrench"></i></div>
                     <div class="stat-info">
                         <div class="stat-label">Maintenance</div>
                         <div class="stat-value"><?= $maintenanceCount ?></div>
@@ -575,7 +596,7 @@ $currentDate = date('l, F j, Y');
             <div class="bikes-grid">
                 <?php if (empty($bikes)): ?>
                     <div class="empty-state">
-                        <span class="empty-icon">🚲</span>
+                        <span class="empty-icon"><i class="fas fa-bicycle"></i></span>
                         <h3>No bikes found</h3>
                         <p>There are no bikes in the system yet.</p>
                     </div>
@@ -595,31 +616,32 @@ $currentDate = date('l, F j, Y');
                         default => 'Rented'
                     };
 
-                    $bikeIcon = match ($bikeType) {
-                        'mountain' => '🚵',
-                        'city' => '🚲',
-                        default => '🚴'
+                    // Use actual bike images
+                    $bikeImage = match ($bikeType) {
+                        'mountain' => 'assets/mountain-bike.png',
+                        'city' => 'assets/city-bike.png',
+                        default => 'assets/city-bike.png'
                     };
                     ?>
 
                     <div class="bike-card" data-status="<?= htmlspecialchars($status) ?>">
                         <div class="bike-card-header">
-                            <span class="bike-type-icon"><?= $bikeIcon ?></span>
+                            <img src="<?= $bikeImage ?>" alt="<?= ucfirst($bikeType) ?> Bike" class="bike-type-img">
                             <span class="bike-status <?= $status ?>"><?= $statusText ?></span>
                         </div>
                         <div class="bike-card-body">
                             <h3><?= htmlspecialchars($bike['bike_name']) ?></h3>
                             <div class="bike-info-list">
                                 <div class="bike-info-item">
-                                    <span class="info-icon">📍</span>
+                                    <span class="info-icon"><i class="fas fa-location-dot"></i></span>
                                     <span><?= htmlspecialchars($location) ?></span>
                                 </div>
                                 <div class="bike-info-item">
-                                    <span class="info-icon">🔧</span>
+                                    <span class="info-icon"><i class="fas fa-wrench"></i></span>
                                     <span>Last maintained: <?= htmlspecialchars($maint) ?></span>
                                 </div>
                                 <div class="bike-info-item">
-                                    <span class="info-icon">🏷️</span>
+                                    <span class="info-icon"><i class="fas fa-tag"></i></span>
                                     <span><?= ucfirst($bikeType) ?> Bike</span>
                                 </div>
                             </div>
@@ -627,23 +649,23 @@ $currentDate = date('l, F j, Y');
                                 <?php if ($status === 'available' && !$hasUnpaidPenalty): ?>
                                     <a class="rent-btn available"
                                         href="rent-instructions.php?bike_id=<?= (int) $bike['bike_id'] ?>">
-                                        <span>🚀</span> Rent Now
+                                        <span><i class="fas fa-rocket"></i></span> Rent Now
                                     </a>
                                 <?php elseif ($status === 'available' && $hasUnpaidPenalty): ?>
                                     <button class="rent-btn penalty" disabled>
-                                        <span>⚠️</span> Penalty Pending
+                                        <span><i class="fas fa-exclamation-triangle"></i></span> Penalty Pending
                                     </button>
                                 <?php elseif ($status === 'pending'): ?>
                                     <button class="rent-btn disabled" disabled>
-                                        <span>⏳</span> Pending Review
+                                        <span><i class="fas fa-hourglass-half"></i></span> Pending Review
                                     </button>
                                 <?php elseif ($status === 'maintenance'): ?>
                                     <button class="rent-btn disabled" disabled>
-                                        <span>🔧</span> Under Maintenance
+                                        <span><i class="fas fa-wrench"></i></span> Under Maintenance
                                     </button>
                                 <?php else: ?>
                                     <button class="rent-btn disabled" disabled>
-                                        <span>🔒</span> Currently Rented
+                                        <span><i class="fas fa-lock"></i></span> Currently Rented
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -657,7 +679,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">⚠️</div>
+            <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

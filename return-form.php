@@ -49,7 +49,8 @@ $currentDate = date('l, F j, Y');
   <meta charset="UTF-8">
   <title>Return Bike - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Return Form Styles */
     .return-container {
@@ -253,20 +254,24 @@ $currentDate = date('l, F j, Y');
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -283,9 +288,6 @@ $currentDate = date('l, F j, Y');
     <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Return Bike</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>
@@ -296,7 +298,8 @@ $currentDate = date('l, F j, Y');
       <div class="return-container">
         <div class="return-card">
           <div class="return-header">
-            <div class="bike-icon"><?= $bikeIcon ?></div>
+            <div class="bike-icon"><i
+                class="fas <?= ($r['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i></div>
             <h2>Return Your Bike</h2>
             <p>Report condition before returning</p>
           </div>
@@ -304,7 +307,9 @@ $currentDate = date('l, F j, Y');
           <div class="return-body">
             <!-- Bike Info -->
             <div class="bike-info-banner">
-              <div class="bike-icon-small"><?= $bikeIcon ?></div>
+              <div class="bike-icon-small"><i
+                  class="fas <?= ($r['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+              </div>
               <div class="bike-details">
                 <div class="bike-label">Currently Rented</div>
                 <div class="bike-name"><?= htmlspecialchars($r['bike_name']) ?></div>
@@ -318,9 +323,9 @@ $currentDate = date('l, F j, Y');
                 <label>Bike Condition</label>
                 <select name="condition_status">
                   <option value="">Select condition...</option>
-                  <option value="good">✅ Good - No issues</option>
-                  <option value="minor_issue">⚠️ Minor Issue</option>
-                  <option value="needs_repair">🔧 Needs Repair</option>
+                  <option value="good"><i class="fas fa-check"></i> Good - No issues</option>
+                  <option value="minor_issue"><i class="fas fa-exclamation"></i> Minor Issue</option>
+                  <option value="needs_repair"><i class="fas fa-wrench"></i> Needs Repair</option>
                 </select>
                 <div class="hint">Optional: Help us maintain our bikes</div>
               </div>
@@ -332,13 +337,14 @@ $currentDate = date('l, F j, Y');
               </div>
 
               <div class="form-buttons">
-                <a href="active-rental.php" class="back-btn">← Back</a>
-                <button type="submit" class="submit-btn">✓ Confirm Return</button>
+                <a href="active-rental.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+                <button type="submit" class="submit-btn"><i class="fas fa-check"></i> Confirm Return</button>
               </div>
             </form>
 
             <div class="info-note">
-              💡 For complaints about service quality, please use the Complaints page after returning.
+              <i class="fas fa-lightbulb"></i> For complaints about service quality, please use the Complaints page
+              after returning.
             </div>
           </div>
         </div>
@@ -349,7 +355,7 @@ $currentDate = date('l, F j, Y');
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">⚠️</div>
+      <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">

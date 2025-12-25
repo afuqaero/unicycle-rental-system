@@ -64,7 +64,8 @@ $currentDate = date('l, F j, Y');
     <meta charset="UTF-8">
     <title>Confirm Rental - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=7">
+    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* Confirm Rental Styles */
         .confirm-container {
@@ -81,37 +82,37 @@ $currentDate = date('l, F j, Y');
 
         .confirm-header {
             background: linear-gradient(135deg, #1a6dff 0%, #0052d4 100%);
-            padding: 32px;
+            padding: 24px;
             text-align: center;
             color: white;
         }
 
         .confirm-header .bike-icon {
-            font-size: 56px;
-            margin-bottom: 12px;
+            font-size: 48px;
+            margin-bottom: 8px;
         }
 
         .confirm-header h2 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             margin-bottom: 4px;
         }
 
         .confirm-header p {
             opacity: 0.9;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .confirm-body {
-            padding: 32px;
+            padding: 24px;
         }
 
         /* Bike Details */
         .bike-details {
             background: #f8fafc;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
         }
 
         .detail-row {
@@ -142,7 +143,7 @@ $currentDate = date('l, F j, Y');
 
         /* Duration Selector */
         .duration-section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .duration-section label {
@@ -150,7 +151,7 @@ $currentDate = date('l, F j, Y');
             font-size: 14px;
             font-weight: 600;
             color: #374151;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .duration-options {
@@ -172,7 +173,7 @@ $currentDate = date('l, F j, Y');
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 16px 8px;
+            padding: 14px 8px;
             background: #f8fafc;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
@@ -211,10 +212,10 @@ $currentDate = date('l, F j, Y');
         .price-summary {
             background: linear-gradient(135deg, #e8f4ff 0%, #dbeafe 100%);
             border: 2px solid #93c5fd;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 16px;
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .price-summary .total-label {
@@ -307,20 +308,24 @@ $currentDate = date('l, F j, Y');
 
         <nav class="sidebar-nav">
             <a href="dashboard.php" class="nav-item">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
                 <span>Dashboard</span>
             </a>
             <a href="available-bikes.php" class="nav-item active">
-                <span class="nav-icon">🚲</span>
+                <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
                 <span>Available Bikes</span>
             </a>
             <a href="rental-summary.php" class="nav-item">
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
                 <span>Rental Summary</span>
             </a>
             <a href="complaints.php" class="nav-item">
-                <span class="nav-icon">💬</span>
+                <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
                 <span>Complaints</span>
+            </a>
+            <a href="settings.php" class="nav-item">
+                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                <span>Settings</span>
             </a>
         </nav>
 
@@ -337,9 +342,6 @@ $currentDate = date('l, F j, Y');
         <div class="header-banner">
             <div class="banner-pattern"></div>
             <div class="banner-content">
-                <div class="banner-dots">
-                    <span></span><span></span><span></span><span></span>
-                </div>
                 <h1>Confirm Rental</h1>
                 <p class="banner-date"><?= $currentDate ?></p>
             </div>
@@ -350,7 +352,9 @@ $currentDate = date('l, F j, Y');
             <div class="confirm-container">
                 <div class="confirm-card">
                     <div class="confirm-header">
-                        <div class="bike-icon"><?= $bikeIcon ?></div>
+                        <div class="bike-icon"><i
+                                class="fas <?= ($bike['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i>
+                        </div>
                         <h2><?= htmlspecialchars($bike['bike_name']) ?></h2>
                         <p>Select duration and confirm</p>
                     </div>
@@ -362,25 +366,25 @@ $currentDate = date('l, F j, Y');
                             <!-- Bike Details -->
                             <div class="bike-details">
                                 <div class="detail-row">
-                                    <span class="label">📍 Location</span>
+                                    <span class="label"><i class="fas fa-location-dot"></i> Location</span>
                                     <span
                                         class="value"><?= htmlspecialchars($bike['location'] ?? 'Main Bike Area') ?></span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="label">💰 Rate</span>
+                                    <span class="label"><i class="fas fa-coins"></i> Rate</span>
                                     <span class="value">RM <?= number_format($rate, 2) ?> / hour</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="label">🕐 Date</span>
+                                    <span class="label"><i class="fas fa-calendar"></i> Date</span>
                                     <span class="value"><?= date("M j, Y g:i A") ?></span>
                                 </div>
                             </div>
 
-                            <!-- Duration Selector -->
+                            <!-- Duration Selector (1-4 hours only) -->
                             <div class="duration-section">
                                 <label>Choose Duration</label>
                                 <div class="duration-options">
-                                    <?php for ($i = 1; $i <= 8; $i++): ?>
+                                    <?php for ($i = 1; $i <= 4; $i++): ?>
                                         <div class="duration-option">
                                             <input type="radio" name="hours" id="hours<?= $i ?>" value="<?= $i ?>" <?= $i === 1 ? 'checked' : '' ?>>
                                             <label for="hours<?= $i ?>">
@@ -414,7 +418,7 @@ $currentDate = date('l, F j, Y');
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
-            <div class="modal-icon">⚠️</div>
+            <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
             <h3>Confirm Logout</h3>
             <p>Are you sure you want to sign out?</p>
             <div class="modal-actions">

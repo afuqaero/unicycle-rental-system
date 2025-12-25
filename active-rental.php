@@ -57,7 +57,8 @@ $currentDate = date('l, F j, Y');
   <meta charset="UTF-8">
   <title>Active Rental - UniCycle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="dashboard.css?v=7">
+  <link rel="stylesheet" href="dashboard.css?v=8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Active Rental Page Styles */
     .rental-container {
@@ -247,20 +248,24 @@ $currentDate = date('l, F j, Y');
 
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="nav-item">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i class="fas fa-gauge-high"></i></span>
         <span>Dashboard</span>
       </a>
       <a href="available-bikes.php" class="nav-item">
-        <span class="nav-icon">🚲</span>
+        <span class="nav-icon"><i class="fas fa-bicycle"></i></span>
         <span>Available Bikes</span>
       </a>
       <a href="rental-summary.php" class="nav-item">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon"><i class="fas fa-clock-rotate-left"></i></span>
         <span>Rental Summary</span>
       </a>
       <a href="complaints.php" class="nav-item">
-        <span class="nav-icon">💬</span>
+        <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
         <span>Complaints</span>
+      </a>
+      <a href="settings.php" class="nav-item">
+        <span class="nav-icon"><i class="fas fa-cog"></i></span>
+        <span>Settings</span>
       </a>
     </nav>
 
@@ -277,9 +282,6 @@ $currentDate = date('l, F j, Y');
     <div class="header-banner">
       <div class="banner-pattern"></div>
       <div class="banner-content">
-        <div class="banner-dots">
-          <span></span><span></span><span></span><span></span>
-        </div>
         <h1>Active Rental</h1>
         <p class="banner-date"><?= $currentDate ?></p>
       </div>
@@ -290,43 +292,44 @@ $currentDate = date('l, F j, Y');
       <div class="rental-container">
         <div class="rental-card">
           <div class="rental-header">
-            <div class="bike-icon"><?= $bikeIcon ?></div>
+            <div class="bike-icon"><i
+                class="fas <?= ($r['bike_type'] ?? 'city') === 'mountain' ? 'fa-mountain' : 'fa-bicycle' ?>"></i></div>
             <h2><?= htmlspecialchars($r['bike_name']) ?></h2>
-            <span class="status-badge">🟢 Active</span>
+            <span class="status-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> Active</span>
           </div>
 
           <div class="rental-body">
             <!-- Countdown -->
             <div class="countdown-section" id="countdownSection">
-              <div class="countdown-label">⏱ Time Remaining</div>
+              <div class="countdown-label"><i class="fas fa-stopwatch"></i> Time Remaining</div>
               <div class="countdown-timer" id="countdown">--:--:--</div>
             </div>
 
             <!-- Info -->
             <div class="rental-info">
               <div class="info-row">
-                <div class="info-icon">📍</div>
+                <div class="info-icon"><i class="fas fa-location-dot"></i></div>
                 <div class="info-content">
                   <div class="info-label">Location</div>
                   <div class="info-value"><?= htmlspecialchars($r['location'] ?? 'Main Bike Area') ?></div>
                 </div>
               </div>
               <div class="info-row">
-                <div class="info-icon">🕐</div>
+                <div class="info-icon"><i class="fas fa-clock"></i></div>
                 <div class="info-content">
                   <div class="info-label">Started</div>
                   <div class="info-value"><?= date('M j, Y \a\t g:i A', strtotime($r['start_time'])) ?></div>
                 </div>
               </div>
               <div class="info-row">
-                <div class="info-icon">📅</div>
+                <div class="info-icon"><i class="fas fa-calendar"></i></div>
                 <div class="info-content">
                   <div class="info-label">Expected Return</div>
                   <div class="info-value"><?= date('M j, Y \a\t g:i A', strtotime($r['expected_return_time'])) ?></div>
                 </div>
               </div>
               <div class="info-row">
-                <div class="info-icon">⏳</div>
+                <div class="info-icon"><i class="fas fa-hourglass-half"></i></div>
                 <div class="info-content">
                   <div class="info-label">Duration</div>
                   <div class="info-value"><?= $duration_hours ?> hour(s)</div>
@@ -335,10 +338,10 @@ $currentDate = date('l, F j, Y');
             </div>
 
             <!-- Return Button -->
-            <a href="return-form.php" class="return-btn">🔄 Return Bike</a>
+            <a href="return-form.php" class="return-btn"><i class="fas fa-rotate-left"></i> Return Bike</a>
 
             <div class="warning-note">
-              ⚠️ You cannot access other pages until you return the bike.
+              <i class="fas fa-exclamation-triangle"></i> You cannot access other pages until you return the bike.
             </div>
           </div>
         </div>
@@ -349,7 +352,7 @@ $currentDate = date('l, F j, Y');
   <!-- Logout Modal -->
   <div class="modal-overlay" id="logoutModal">
     <div class="modal-box">
-      <div class="modal-icon">⚠️</div>
+      <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
       <h3>Confirm Logout</h3>
       <p>Are you sure you want to sign out?</p>
       <div class="modal-actions">
@@ -370,7 +373,7 @@ $currentDate = date('l, F j, Y');
       if (diff < 0) {
         diff = Math.abs(diff);
         section.classList.add('countdown-warning');
-        document.querySelector('.countdown-label').textContent = '⚠️ OVERDUE';
+        document.querySelector('.countdown-label').innerHTML = '<i class="fas fa-exclamation-triangle"></i> OVERDUE';
       }
 
       const h = Math.floor(diff / 3600000);
