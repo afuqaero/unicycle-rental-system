@@ -526,6 +526,38 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
         font-weight: 600;
       }
 
+      .mobile-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+
+      .mobile-logo-icon {
+        width: 40px;
+        height: 40px;
+        background: #3b82f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: white;
+        font-size: 18px;
+      }
+
+      .mobile-page-title {
+        display: block;
+        padding: 8px 20px 0;
+      }
+
+      .mobile-page-title h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+      }
+
       .mobile-menu-btn {
         width: 40px;
         height: 40px;
@@ -542,7 +574,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
       }
 
       .dashboard-content {
-        padding-top: 30px;
+        padding-top: 40px;
       }
 
       .summary-stats {
@@ -732,6 +764,7 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
     @media (min-width: 769px) {
 
       .mobile-header,
+      .mobile-page-title,
       .bottom-nav,
       .mobile-menu-overlay {
         display: none !important;
@@ -742,10 +775,18 @@ function penalty_breakdown(int $lateMinutesAfterGrace, float $rateFirst2h, float
   <!-- Mobile Header -->
   <header class="mobile-header">
     <div class="mobile-header-left">
-      <span class="mobile-title">Rental Summary</span>
+      <a href="dashboard.php" class="mobile-logo">
+        <div class="mobile-logo-icon">U</div>
+        <span class="mobile-title">UniCycle</span>
+      </a>
     </div>
     <button class="mobile-menu-btn" onclick="openMobileMenu()"><i class="fas fa-bars"></i></button>
   </header>
+
+  <!-- Mobile Page Title -->
+  <div class="mobile-page-title">
+    <h1>Rental Summary</h1>
+  </div>
 
   <!-- Sidebar -->
   <aside class="sidebar">

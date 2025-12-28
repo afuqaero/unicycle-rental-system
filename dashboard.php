@@ -177,16 +177,16 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
             }
 
             .mobile-logo-icon {
-                width: 36px;
-                height: 36px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 10px;
+                width: 40px;
+                height: 40px;
+                background: #3b82f6;
+                border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-weight: 700;
                 color: white;
-                font-size: 16px;
+                font-size: 18px;
             }
 
             .mobile-title {
@@ -212,7 +212,7 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
 
             .dashboard-content {
                 display: block !important;
-                padding-top: 30px;
+                padding-top: 50px;
             }
 
             .content-left,
@@ -495,6 +495,11 @@ $greeting = (date('H') < 12) ? 'Good Morning' : ((date('H') < 17) ? 'Good Aftern
                 <h1>Dashboard</h1>
                 <p class="banner-date"><?= $currentDate ?></p>
             </div>
+        </div>
+
+        <!-- Mobile Page Title (visible only on mobile) -->
+        <div class="mobile-page-title">
+            <h1>Dashboard</h1>
         </div>
 
         <!-- Dashboard Content -->

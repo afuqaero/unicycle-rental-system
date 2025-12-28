@@ -73,14 +73,14 @@ body {
 }
 
 .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #1a6dff, #0052d4);
-    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    background: #3b82f6;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: white;
 }
@@ -322,6 +322,11 @@ body {
 .banner-date {
     font-size: 14px;
     opacity: 0.85;
+}
+
+/* Mobile Page Title - hidden on desktop */
+.mobile-page-title {
+    display: none;
 }
 
 /* =========================
@@ -1046,9 +1051,27 @@ body {
         font-size: 24px;
     }
 
+    /* Hide desktop header banner on mobile */
+    .header-banner {
+        display: none;
+    }
+
+    /* Show mobile page title */
+    .mobile-page-title {
+        display: block;
+        padding: 8px 20px 0;
+    }
+
+    .mobile-page-title h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
     .dashboard-content {
-        padding: 20px 16px 30px;
-        margin-top: -30px;
+        padding: 8px 16px 30px;
+        margin-top: 0;
         max-width: 100% !important;
     }
 

@@ -11,7 +11,8 @@
     font-family: 'Inter', 'Segoe UI', sans-serif;
     padding: 20px;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Split layout for login page */
@@ -58,8 +59,9 @@
     }
 
     .auth-welcome {
-        text-align: center;
+        text-align: left;
         max-width: 100%;
+        padding-left: 20px;
     }
 
     .auth-welcome h1 {
@@ -74,6 +76,11 @@
 @media (max-width: 480px) {
     .auth-body-split {
         padding: 20px;
+        overflow-y: auto;
+    }
+
+    .auth-body {
+        overflow-y: auto;
     }
 
     .auth-welcome h1 {
