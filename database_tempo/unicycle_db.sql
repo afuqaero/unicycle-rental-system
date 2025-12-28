@@ -40,26 +40,40 @@ INSERT INTO `admin` (`admin_id`, `username`, `email`, `password`) VALUES
 
 -- ============================================
 -- Table: students
--- Students/Staff users (for login/register)
+-- All users (students, staff, admins)
 -- ============================================
 CREATE TABLE `students` (
     `student_id` INT(11) NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
-    `student_staff_id` VARCHAR(30) DEFAULT NULL COMMENT 'Matric No or Staff ID',
-    `role` ENUM('student', 'staff', 'admin', 'super_admin') NOT NULL DEFAULT 'student',
+    `role` ENUM('user', 'admin', 'superadmin') NOT NULL DEFAULT 'user',
     `phone` VARCHAR(20) DEFAULT NULL,
+    `profile_pic` VARCHAR(255) DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`student_id`),
-    UNIQUE KEY `email` (`email`),
-    UNIQUE KEY `student_staff_id` (`student_staff_id`)
+    UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample student data (password: password123)
-INSERT INTO `students` (`student_id`, `name`, `email`, `password`, `student_staff_id`, `role`) VALUES
-(1, 'Ahmad Firdaus', 'ahmad@student.uthm.edu.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'AI220001', 'student'),
-(2, 'Sarah Lim', 'sarah@staff.uthm.edu.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'STAFF001', 'staff');
+-- Sample user data (password: password123)
+INSERT INTO `students` (`student_id`, `name`, `email`, `password`, `role`) VALUES
+(1, 'Ahmad Firdaus', 'ahmad@student.uthm.edu.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user'),
+(2, 'Sarah Lim', 'sarah@staff.uthm.edu.my', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+
+-- ============================================
+-- Table: password_resets
+-- Password reset tokens
+-- ============================================
+CREATE TABLE `password_resets` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `student_id` INT(11) NOT NULL,
+    `token` VARCHAR(64) NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `token` (`token`),
+    KEY `fk_reset_student` (`student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
 -- Table: bikes

@@ -3,19 +3,18 @@ session_start();
 require_once "config.php";
 
 $error = '';
-$activeTab = isset($_POST['login_type']) ? $_POST['login_type'] : 'email';
 
-// Handle Email/ID login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_POST['login_type'] === 'email') {
-    $email = trim($_POST['email'] ?? '');
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($email) || empty($password)) {
+    if (empty($username) || empty($password)) {
         $error = 'Please fill in all fields.';
     } else {
-        // Check against students table (includes role for admin detection)
-        $stmt = $pdo->prepare("SELECT student_id, name, email, password, role FROM students WHERE email = ? OR student_staff_id = ?");
-        $stmt->execute([$email, $email]);
+        // Check against students table by username (name field)
+        $stmt = $pdo->prepare("SELECT student_id, name, email, password, role FROM students WHERE name = ?");
+        $stmt->execute([$username]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
@@ -26,31 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
             $_SESSION['user_role'] = $user['role'];
 
             // Role-based routing: Admin/Super Admin go to admin dashboard
-            if ($user['role'] === 'admin' || $user['role'] === 'super_admin') {
+            if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
                 $_SESSION['is_admin'] = true;
                 $_SESSION['admin_role'] = $user['role'];
                 header('Location: admin/dashboard.php');
                 exit;
             }
 
-            // Regular users (student/staff) go to normal dashboard
+            // Regular users go to normal dashboard
             header('Location: dashboard.php');
             exit;
         } else {
-            $error = 'Invalid email/ID or password.';
+            $error = 'Invalid username or password.';
         }
-    }
-}
-
-// Handle Phone login (OTP - placeholder for now)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_POST['login_type'] === 'phone') {
-    $phone = trim($_POST['phone'] ?? '');
-
-    if (empty($phone)) {
-        $error = 'Please enter your phone number.';
-    } else {
-        // For now, just show a message that OTP is not implemented
-        $error = 'OTP login is coming soon! Please use Email/ID login for now.';
     }
 }
 ?>
@@ -92,50 +79,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
                 <h1 class="auth-title">Sign In</h1>
                 <p class="auth-subtitle">Sign in to your account to continue</p>
 
-                <!-- Tab Switcher -->
-                <div class="auth-tabs">
-                    <button type="button" class="auth-tab <?= $activeTab === 'email' ? 'active' : '' ?>"
-                        data-tab="email">Email / ID</button>
-                    <button type="button" class="auth-tab <?= $activeTab === 'phone' ? 'active' : '' ?>"
-                        data-tab="phone">Phone</button>
-                </div>
-
                 <!-- Error Message -->
                 <?php if ($error): ?>
                     <div class="auth-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <!-- Email/ID Login Form -->
-                <form method="POST" class="auth-form <?= $activeTab === 'email' ? 'active' : '' ?>" id="email-form">
-                    <input type="hidden" name="login_type" value="email">
-
+                <!-- Login Form -->
+                <form method="POST" class="auth-form active" id="login-form">
                     <div class="form-group">
-                        <label for="email">Email / Student ID / Staff ID</label>
-                        <input type="text" id="email" name="email" placeholder="Enter your email or ID" required>
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                        <a href="#" class="forgot-link">Forgot password?</a>
+                        <a href="forgot-password.php" class="forgot-link">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn-auth-primary">Login</button>
-                </form>
-
-                <!-- Phone Login Form -->
-                <form method="POST" class="auth-form <?= $activeTab === 'phone' ? 'active' : '' ?>" id="phone-form">
-                    <input type="hidden" name="login_type" value="phone">
-
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <div class="phone-input-group">
-                            <div class="country-code">+60</div>
-                            <input type="tel" id="phone" name="phone" placeholder="12 345 6789">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-auth-primary">Send OTP</button>
                 </form>
 
                 <!-- Divider -->
@@ -176,29 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_type']) && $_PO
         </div>
     </div>
 
-    <script>
-        // Tab switching
-        const tabs = document.querySelectorAll('.auth-tab');
-        const forms = document.querySelectorAll('.auth-form');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetTab = tab.dataset.tab;
-
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                // Show corresponding form
-                forms.forEach(form => {
-                    form.classList.remove('active');
-                    if (form.id === targetTab + '-form') {
-                        form.classList.add('active');
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

@@ -25,7 +25,7 @@ if (isset($_POST['delete_user'])) {
 }
 
 // Handle Role Update (Super Admin only)
-if (isset($_POST['update_role']) && ($_SESSION['admin_role'] ?? '') === 'super_admin') {
+if (isset($_POST['update_role']) && ($_SESSION['admin_role'] ?? '') === 'superadmin') {
     $student_id = $_POST['student_id'];
     $new_role = $_POST['role'];
 
@@ -45,14 +45,14 @@ if (isset($_POST['update_role']) && ($_SESSION['admin_role'] ?? '') === 'super_a
 $filter = $_GET['filter'] ?? 'all';
 $where = '';
 switch ($filter) {
-    case 'student':
-        $where = "WHERE role = 'student'";
-        break;
-    case 'staff':
-        $where = "WHERE role = 'staff'";
+    case 'user':
+        $where = "WHERE role = 'user'";
         break;
     case 'admin':
-        $where = "WHERE role IN ('admin', 'super_admin')";
+        $where = "WHERE role = 'admin'";
+        break;
+    case 'superadmin':
+        $where = "WHERE role = 'superadmin'";
         break;
 }
 
@@ -61,12 +61,12 @@ $users = $pdo->query("SELECT * FROM students $where ORDER BY created_at DESC")->
 // Counts
 $counts = [
     'all' => $pdo->query("SELECT COUNT(*) FROM students")->fetchColumn(),
-    'student' => $pdo->query("SELECT COUNT(*) FROM students WHERE role = 'student'")->fetchColumn(),
-    'staff' => $pdo->query("SELECT COUNT(*) FROM students WHERE role = 'staff'")->fetchColumn(),
-    'admin' => $pdo->query("SELECT COUNT(*) FROM students WHERE role IN ('admin', 'super_admin')")->fetchColumn(),
+    'user' => $pdo->query("SELECT COUNT(*) FROM students WHERE role = 'user'")->fetchColumn(),
+    'admin' => $pdo->query("SELECT COUNT(*) FROM students WHERE role = 'admin'")->fetchColumn(),
+    'superadmin' => $pdo->query("SELECT COUNT(*) FROM students WHERE role = 'superadmin'")->fetchColumn(),
 ];
 
-$isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'super_admin';
+$isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'superadmin';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -156,28 +156,29 @@ $isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'super_admin';
                 <div class="value"><?= $counts['all'] ?></div>
             </div>
             <div class="stat-card success">
-                <div class="icon"><i class="fas fa-graduation-cap"></i></div>
-                <h3>Students</h3>
-                <div class="value"><?= $counts['student'] ?></div>
+                <div class="icon"><i class="fas fa-user"></i></div>
+                <h3>Users</h3>
+                <div class="value"><?= $counts['user'] ?></div>
             </div>
             <div class="stat-card secondary">
-                <div class="icon"><i class="fas fa-briefcase"></i></div>
-                <h3>Staff</h3>
-                <div class="value"><?= $counts['staff'] ?></div>
-            </div>
-            <div class="stat-card warning">
                 <div class="icon"><i class="fas fa-user-shield"></i></div>
                 <h3>Admins</h3>
                 <div class="value"><?= $counts['admin'] ?></div>
+            </div>
+            <div class="stat-card warning">
+                <div class="icon"><i class="fas fa-user-shield"></i></div>
+                <h3>Super Admins</h3>
+                <div class="value"><?= $counts['superadmin'] ?></div>
             </div>
         </div>
 
         <!-- Filters -->
         <div class="filters-bar">
             <a href="?filter=all" class="filter-btn <?= $filter === 'all' ? 'active' : '' ?>">All</a>
-            <a href="?filter=student" class="filter-btn <?= $filter === 'student' ? 'active' : '' ?>">Students</a>
-            <a href="?filter=staff" class="filter-btn <?= $filter === 'staff' ? 'active' : '' ?>">Staff</a>
+            <a href="?filter=user" class="filter-btn <?= $filter === 'user' ? 'active' : '' ?>">Users</a>
             <a href="?filter=admin" class="filter-btn <?= $filter === 'admin' ? 'active' : '' ?>">Admins</a>
+            <a href="?filter=superadmin" class="filter-btn <?= $filter === 'superadmin' ? 'active' : '' ?>">Super
+                Admins</a>
         </div>
 
         <!-- Users Table -->
@@ -187,7 +188,7 @@ $isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'super_admin';
                     <thead>
                         <tr>
                             <th>User</th>
-                            <th>ID</th>
+                            <th>Email</th>
                             <th>Role</th>
                             <th>Joined</th>
                             <th>Actions</th>
@@ -205,11 +206,11 @@ $isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'super_admin';
                                         </div>
                                     </div>
                                 </td>
-                                <td><?= htmlspecialchars($user['student_staff_id'] ?? '-') ?></td>
+                                <td><?= htmlspecialchars($user['email']) ?></td>
                                 <td>
                                     <span
-                                        class="badge <?= in_array($user['role'], ['admin', 'super_admin']) ? 'active' : 'available' ?>">
-                                        <?= ucfirst(str_replace('_', ' ', $user['role'])) ?>
+                                        class="badge <?= in_array($user['role'], ['admin', 'superadmin']) ? 'active' : 'available' ?>">
+                                        <?= ucfirst($user['role']) ?>
                                     </span>
                                 </td>
                                 <td><?= date('d M Y', strtotime($user['created_at'])) ?></td>
@@ -220,13 +221,12 @@ $isSuperAdmin = ($_SESSION['admin_role'] ?? '') === 'super_admin';
                                         <?php if ($isSuperAdmin && $user['student_id'] != $_SESSION['student_id']): ?>
                                             <select name="role" class="form-control"
                                                 style="padding: 6px 10px; font-size: 0.85rem;">
-                                                <option value="student" <?= $user['role'] === 'student' ? 'selected' : '' ?>>
-                                                    Student</option>
-                                                <option value="staff" <?= $user['role'] === 'staff' ? 'selected' : '' ?>>Staff
+                                                <option value="user" <?= $user['role'] === 'user' ? 'selected' : '' ?>>User
                                                 </option>
                                                 <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin
                                                 </option>
-                                                <option value="super_admin" <?= $user['role'] === 'super_admin' ? 'selected' : '' ?>>Super Admin</option>
+                                                <option value="superadmin" <?= $user['role'] === 'superadmin' ? 'selected' : '' ?>>
+                                                    Super Admin</option>
                                             </select>
                                             <button type="submit" name="update_role"
                                                 class="btn btn-primary btn-sm">Update</button>

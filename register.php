@@ -8,13 +8,11 @@ $success = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $student_id = trim($_POST['student_id'] ?? '');
-    $role = $_POST['role'] ?? 'student';
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
     // Validation
-    if (empty($name) || empty($email) || empty($student_id) || empty($password) || empty($confirm_password)) {
+    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
         $error = 'Please fill in all required fields.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
@@ -23,19 +21,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm_password) {
         $error = 'Passwords do not match.';
     } else {
-        // Check if email or student_id already exists
-        $stmt = $pdo->prepare("SELECT student_id FROM students WHERE email = ? OR student_staff_id = ?");
-        $stmt->execute([$email, $student_id]);
+        // Check if email already exists
+        $stmt = $pdo->prepare("SELECT student_id FROM students WHERE email = ?");
+        $stmt->execute([$email]);
 
         if ($stmt->fetch()) {
-            $error = 'Email or Student/Staff ID already registered.';
+            $error = 'Email already registered.';
         } else {
-            // Insert new user
+            // Insert new user (role defaults to 'user')
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO students (name, email, student_staff_id, role, password) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO students (name, email, password, role) VALUES (?, ?, ?, 'user')");
 
             try {
-                $stmt->execute([$name, $email, $student_id, $role, $hashed_password]);
+                $stmt->execute([$name, $email, $hashed_password]);
                 $success = true;
             } catch (PDOException $e) {
                 $error = 'Registration failed. Please try again.';
@@ -124,25 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="form-group">
-                        <label for="student_id">Student ID / Staff ID *</label>
-                        <input type="text" id="student_id" name="student_id" placeholder="e.g. AI220001"
-                            value="<?= htmlspecialchars($_POST['student_id'] ?? '') ?>" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="role">Role *</label>
-                        <select id="role" name="role" class="role-select">
-                            <option value="student" <?= ($_POST['role'] ?? 'student') === 'student' ? 'selected' : '' ?>>
-                                Student</option>
-                            <option value="staff" <?= ($_POST['role'] ?? '') === 'staff' ? 'selected' : '' ?>>Staff
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="password">Password *</label>
                         <input type="password" id="password" name="password" placeholder="At least 6 characters"
-                            required>
+                            required oninput="checkPasswordStrength(this.value)">
+                        <div class="password-strength" id="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strength-fill"></div>
+                            </div>
+                            <span class="strength-text" id="strength-text"></span>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -162,6 +150,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-</body>
+    <!-- Password Strength Styles -->
+    <style>
+        .password-strength {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .password-strength.visible {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strength-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .strength-fill.weak {
+            width: 33%;
+            background: linear-gradient(90deg, #ff4d4d, #ff6b6b);
+        }
+
+        .strength-fill.medium {
+            width: 66%;
+            background: linear-gradient(90deg, #ffa500, #ffb833);
+        }
+
+        .strength-fill.strong {
+            width: 100%;
+            background: linear-gradient(90deg, #00c853, #69f0ae);
+        }
+
+        .strength-text {
+            font-size: 12px;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .strength-text.weak {
+            color: #ff6b6b;
+        }
+
+        .strength-text.medium {
+            color: #ffb833;
+        }
+
+        .strength-text.strong {
+            color: #69f0ae;
+        }
+    </style>
+
+    <!-- Password Strength Script -->
+    <script>
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('password-strength');
+            const fill = document.getElementById('strength-fill');
+            const text = document.getElementById('strength-text');
+
+            if (password.length === 0) {
+                strengthDiv.classList.remove('visible');
+                return;
+            }
+
+            strengthDiv.classList.add('visible');
+
+            // Calculate strength
+            let strength = 0;
+
+            // Length check
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+
+            // Contains uppercase
+            if (/[A-Z]/.test(password)) strength++;
+
+            // Contains number
+            if (/[0-9]/.test(password)) strength++;
+
+            // Contains special character
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            // Remove all classes
+            fill.className = 'strength-fill';
+            text.className = 'strength-text';
+
+            // Apply appropriate class
+            if (strength <= 2) {
+                fill.classList.add('weak');
+                text.classList.add('weak');
+                text.textContent = 'Weak';
+            } else if (strength <= 3) {
+                fill.classList.add('medium');
+                text.classList.add('medium');
+                text.textContent = 'Medium';
+            } else {
+                fill.classList.add('strong');
+                text.classList.add('strong');
+                text.textContent = 'Strong';
+            }
+        }
+    </script>
 
 </html>

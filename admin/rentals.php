@@ -21,7 +21,7 @@ switch ($filter) {
 }
 
 $rentals = $pdo->query("
-    SELECT r.*, s.name as student_name, s.email, s.student_staff_id, b.bike_code, b.bike_name
+    SELECT r.*, s.name as student_name, s.email, b.bike_code, b.bike_name
     FROM rentals r 
     JOIN students s ON r.student_id = s.student_id 
     JOIN bikes b ON r.bike_id = b.bike_id 
@@ -119,14 +119,16 @@ $stats = [
                                         <div style="font-weight: 500;"><?= htmlspecialchars($rental['student_name']) ?>
                                         </div>
                                         <div style="font-size: 0.8rem; color: var(--gray-500);">
-                                            <?= htmlspecialchars($rental['student_staff_id'] ?? $rental['email']) ?></div>
+                                            <?= htmlspecialchars($rental['email']) ?></div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         <div style="font-weight: 500;"><?= htmlspecialchars($rental['bike_code']) ?></div>
                                         <div style="font-size: 0.8rem; color: var(--gray-500);">
-                                            <?= htmlspecialchars($rental['bike_name']) ?></div>
+                                            <?= htmlspecialchars($rental['bike_name']) ?>
+                                        </div>
                                     </div>
                                 </td>
                                 <td><?= date('d M Y, h:i A', strtotime($rental['start_time'])) ?></td>
