@@ -2,6 +2,7 @@
 -- UniCycle Unified Database
 -- Merged from bike_admin.sql + bike_rental.sql
 -- Generated: 2025-12-24
+-- UPDATED FOR INFINITYFREE IMPORT
 -- ============================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -16,8 +17,10 @@ SET time_zone = "+00:00";
 -- ============================================
 -- Database: unicycle_db
 -- ============================================
-CREATE DATABASE IF NOT EXISTS `unicycle_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `unicycle_db`;
+-- NOTE: For InfinityFree, comment out these lines as you cannot create databases
+-- The database is already created by the hosting provider
+-- CREATE DATABASE IF NOT EXISTS `unicycle_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE `unicycle_db`;
 
 -- ============================================
 -- Table: admin

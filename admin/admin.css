@@ -79,14 +79,26 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: white;
-    font-size: 1.4rem;
-    font-weight: 700;
+    text-decoration: none;
 }
 
-.sidebar-logo i {
-    font-size: 1.6rem;
-    color: var(--primary-light);
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 18px;
+}
+
+.logo-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
 }
 
 .admin-badge {

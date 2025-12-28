@@ -68,10 +68,10 @@ if (strpos($adminName, ' ') !== false) {
 <!-- Desktop Sidebar -->
 <div class="admin-sidebar">
     <div class="sidebar-header">
-        <div class="sidebar-logo">
-            <i class="fas fa-bicycle"></i>
-            <span>UniCycle</span>
-        </div>
+        <a href="dashboard.php" class="sidebar-logo">
+            <div class="logo-icon">U</div>
+            <span class="logo-text">UniCycle</span>
+        </a>
         <span class="admin-badge">Admin</span>
     </div>
 
