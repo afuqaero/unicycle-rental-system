@@ -41,12 +41,14 @@ CREATE TABLE IF NOT EXISTS `students` (
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
+    `google_id` VARCHAR(100) DEFAULT NULL,
     `role` ENUM('user', 'admin', 'superadmin') NOT NULL DEFAULT 'user',
     `phone` VARCHAR(20) DEFAULT NULL,
     `profile_pic` VARCHAR(255) DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`student_id`),
-    UNIQUE KEY `email` (`email`)
+    UNIQUE KEY `email` (`email`),
+    UNIQUE KEY `google_id` (`google_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Sample user data (password: password123)

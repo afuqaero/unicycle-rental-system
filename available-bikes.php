@@ -81,7 +81,7 @@ $currentDate = date('l, F j, Y');
     <meta charset="UTF-8">
     <title>Available Bikes - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="dashboard.css?v=9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* Available Bikes Page Specific Styles */
@@ -434,8 +434,131 @@ $currentDate = date('l, F j, Y');
         }
 
         @media (max-width: 768px) {
+
+            /* Force hide sidebar and reset main content on mobile */
+            .sidebar {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            body {
+                display: block !important;
+            }
+
+            /* Mobile Header */
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .mobile-header-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mobile-back-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+            }
+
+            .mobile-back-btn:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+            .mobile-title {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .mobile-menu-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+            }
+
+            /* Compact Stats for Mobile */
             .bikes-stats {
-                grid-template-columns: 1fr;
+                display: none;
+            }
+
+            .mobile-stats-summary {
+                display: flex;
+                background: white;
+                border-radius: 12px;
+                padding: 12px;
+                margin-top: 24px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                overflow-x: auto;
+                gap: 8px;
+            }
+
+            .mobile-stat-chip {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 12px;
+                background: #f8fafc;
+                border-radius: 20px;
+                white-space: nowrap;
+                font-size: 13px;
+                font-weight: 500;
+                color: #1e293b;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: 2px solid transparent;
+            }
+
+            .mobile-stat-chip.active {
+                background: #2563eb;
+                color: white;
+            }
+
+            .mobile-stat-chip i {
+                font-size: 12px;
+            }
+
+            .mobile-stat-chip.available i {
+                color: #10b981;
+            }
+
+            .mobile-stat-chip.rented i {
+                color: #ef4444;
+            }
+
+            .mobile-stat-chip.maintenance i {
+                color: #f59e0b;
+            }
+
+            .mobile-stat-chip.active i {
+                color: white;
             }
 
             .bikes-grid {
@@ -443,13 +566,225 @@ $currentDate = date('l, F j, Y');
             }
 
             .filter-tabs {
-                flex-wrap: wrap;
+                display: none;
+            }
+
+            /* Bottom Navigation */
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                padding: 8px 0;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+
+            .bottom-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: 8px;
+                text-decoration: none;
+                color: #64748b;
+                font-size: 11px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+            .bottom-nav-item.active {
+                color: #2563eb;
+            }
+
+            .bottom-nav-item i {
+                font-size: 20px;
+            }
+
+            .bottom-nav-item.active i {
+                transform: scale(1.1);
+            }
+
+            /* Adjust content for bottom nav */
+            .main-content {
+                padding-bottom: 80px;
+            }
+
+            /* Hide header banner on mobile - using mobile header instead */
+            .header-banner {
+                display: none;
+            }
+
+            .dashboard-content {
+                padding-top: 16px;
+            }
+
+            /* Mobile slide menu */
+            .mobile-menu-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 200;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s;
+            }
+
+            .mobile-menu-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .mobile-menu-panel {
+                position: fixed;
+                top: 0;
+                right: -280px;
+                width: 280px;
+                height: 100%;
+                background: white;
+                z-index: 201;
+                transition: right 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .mobile-menu-overlay.active .mobile-menu-panel {
+                right: 0;
+            }
+
+            .mobile-menu-header {
+                padding: 20px;
+                background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+                color: white;
+                position: relative;
+            }
+
+            .mobile-menu-close {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-menu-close:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+            .mobile-menu-user {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mobile-menu-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .mobile-menu-name {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .mobile-menu-email {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
+            .mobile-menu-nav {
+                flex: 1;
+                padding: 16px 0;
+            }
+
+            .mobile-menu-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 14px 20px;
+                color: #1e293b;
+                text-decoration: none;
+                font-size: 15px;
+                font-weight: 500;
+                transition: background 0.2s;
+            }
+
+            .mobile-menu-item:hover {
+                background: #f8fafc;
+            }
+
+            .mobile-menu-item.active {
+                color: #2563eb;
+                background: #eff6ff;
+            }
+
+            .mobile-menu-item i {
+                width: 24px;
+                font-size: 18px;
+            }
+
+            .mobile-menu-footer {
+                padding: 16px 20px;
+                border-top: 1px solid #e2e8f0;
+            }
+
+            .mobile-logout-btn {
+                width: 100%;
+                padding: 12px;
+                background: #fee2e2;
+                color: #dc2626;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+        }
+
+        /* Hide mobile elements on desktop */
+        @media (min-width: 769px) {
+
+            .mobile-header,
+            .mobile-stats-summary,
+            .bottom-nav,
+            .mobile-menu-overlay {
+                display: none !important;
             }
         }
     </style>
 </head>
 
 <body>
+
+    <!-- Mobile Header (visible only on mobile) -->
+    <header class="mobile-header">
+        <div class="mobile-header-left">
+            <span class="mobile-title">Available Bikes</span>
+        </div>
+        <button class="mobile-menu-btn" onclick="openMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
 
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -541,7 +876,23 @@ $currentDate = date('l, F j, Y');
                 </div>
             <?php endif; ?>
 
-            <!-- Stats Cards -->
+            <!-- Mobile Stats Summary (visible only on mobile) -->
+            <div class="mobile-stats-summary">
+                <div class="mobile-stat-chip active" onclick="filterBikesMobile('all', this)">
+                    <i class="fas fa-bicycle"></i> All <?= $totalBikes ?>
+                </div>
+                <div class="mobile-stat-chip available" onclick="filterBikesMobile('available', this)">
+                    <i class="fas fa-check"></i> Available <?= $availableCount ?>
+                </div>
+                <div class="mobile-stat-chip rented" onclick="filterBikesMobile('rented', this)">
+                    <i class="fas fa-lock"></i> Rented <?= $rentedCount ?>
+                </div>
+                <div class="mobile-stat-chip maintenance" onclick="filterBikesMobile('maintenance', this)">
+                    <i class="fas fa-wrench"></i> Maintenance <?= $maintenanceCount ?>
+                </div>
+            </div>
+
+            <!-- Stats Cards (hidden on mobile) -->
             <div class="bikes-stats">
                 <div class="stat-card" onclick="filterBikes('all', this)" data-filter="all">
                     <div class="stat-icon available"><i class="fas fa-bicycle"></i></div>
@@ -676,6 +1027,51 @@ $currentDate = date('l, F j, Y');
         </div>
     </main>
 
+    <!-- Mobile Slide Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenu" onclick="closeMobileMenu(event)">
+        <div class="mobile-menu-panel" onclick="event.stopPropagation()">
+            <div class="mobile-menu-header">
+                <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+                <div class="mobile-menu-user">
+                    <div class="mobile-menu-avatar">
+                        <?php if ($profile_pic && file_exists('assets/uploads/' . $profile_pic)): ?>
+                            <img src="assets/uploads/<?= htmlspecialchars($profile_pic) ?>" alt="Profile"
+                                style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <?= htmlspecialchars($initials) ?>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <div class="mobile-menu-name"><?= htmlspecialchars($student_name) ?></div>
+                        <div class="mobile-menu-email"><?= $totalRentals ?> total rides</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="mobile-menu-nav">
+                <a href="dashboard.php" class="mobile-menu-item">
+                    <i class="fas fa-gauge-high"></i> Dashboard
+                </a>
+                <a href="available-bikes.php" class="mobile-menu-item active">
+                    <i class="fas fa-bicycle"></i> Available Bikes
+                </a>
+                <a href="rental-summary.php" class="mobile-menu-item">
+                    <i class="fas fa-clock-rotate-left"></i> Rental Summary
+                </a>
+                <a href="complaints.php" class="mobile-menu-item">
+                    <i class="fas fa-comment-dots"></i> Complaints
+                </a>
+                <a href="settings.php" class="mobile-menu-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+            <div class="mobile-menu-footer">
+                <button class="mobile-logout-btn" onclick="showLogoutModal()">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Logout Modal -->
     <div class="modal-overlay" id="logoutModal">
         <div class="modal-box">
@@ -739,8 +1135,43 @@ $currentDate = date('l, F j, Y');
             if (e.target === this) hideLogoutModal();
         });
 
+        // Mobile Menu Functions
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('mobileMenu').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Mobile Filter Function
+        function filterBikesMobile(status, el) {
+            const cards = document.querySelectorAll('.bike-card');
+            const mobileChips = document.querySelectorAll('.mobile-stat-chip');
+
+            // Update active chip
+            mobileChips.forEach(chip => chip.classList.remove('active'));
+            el.classList.add('active');
+
+            // Filter cards
+            cards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = '';
+                    card.style.animation = 'fadeIn 0.3s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') hideLogoutModal();
+            if (e.key === 'Escape') {
+                hideLogoutModal();
+                closeMobileMenu();
+            }
         });
 
         // Add fade in animation

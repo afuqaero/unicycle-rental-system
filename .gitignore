@@ -1,0 +1,21 @@
+# Sensitive configuration files
+google_config.php
+mail_config.php
+config.php
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak

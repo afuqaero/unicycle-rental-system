@@ -130,7 +130,7 @@ $currentDate = date('l, F j, Y');
     <meta charset="UTF-8">
     <title>Settings - UniCycle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="dashboard.css?v=8">
+    <link rel="stylesheet" href="dashboard.css?v=9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <style>
@@ -411,6 +411,262 @@ $currentDate = date('l, F j, Y');
 </head>
 
 <body>
+    <style>
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .mobile-header-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mobile-back-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+            }
+
+            .mobile-title {
+                color: white;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .mobile-menu-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+            }
+
+            .header-banner {
+                display: none;
+            }
+
+            .dashboard-content {
+                padding-top: 30px;
+            }
+
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                padding: 8px 0;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+            }
+
+            .bottom-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: 8px;
+                text-decoration: none;
+                color: #64748b;
+                font-size: 11px;
+                font-weight: 500;
+            }
+
+            .bottom-nav-item.active {
+                color: #2563eb;
+            }
+
+            .bottom-nav-item i {
+                font-size: 20px;
+            }
+
+            .main-content {
+                padding-bottom: 80px;
+            }
+
+            .mobile-menu-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 200;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s;
+            }
+
+            .mobile-menu-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .mobile-menu-panel {
+                position: fixed;
+                top: 0;
+                right: -280px;
+                width: 280px;
+                height: 100%;
+                background: white;
+                z-index: 201;
+                transition: right 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .mobile-menu-overlay.active .mobile-menu-panel {
+                right: 0;
+            }
+
+            .mobile-menu-header {
+                padding: 20px;
+                background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+                color: white;
+                position: relative;
+            }
+
+            .mobile-menu-close {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.15);
+                border: none;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-menu-close:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+            .mobile-menu-user {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mobile-menu-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                font-weight: 600;
+                overflow: hidden;
+            }
+
+            .mobile-menu-name {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .mobile-menu-email {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
+            .mobile-menu-nav {
+                flex: 1;
+                padding: 16px 0;
+            }
+
+            .mobile-menu-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 14px 20px;
+                color: #1e293b;
+                text-decoration: none;
+                font-size: 15px;
+                font-weight: 500;
+            }
+
+            .mobile-menu-item:hover {
+                background: #f8fafc;
+            }
+
+            .mobile-menu-item.active {
+                color: #2563eb;
+                background: #eff6ff;
+            }
+
+            .mobile-menu-item i {
+                width: 24px;
+                font-size: 18px;
+            }
+
+            .mobile-menu-footer {
+                padding: 16px 20px;
+                border-top: 1px solid #e2e8f0;
+            }
+
+            .mobile-logout-btn {
+                width: 100%;
+                padding: 12px;
+                background: #fee2e2;
+                color: #dc2626;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+        }
+
+        @media (min-width: 769px) {
+
+            .mobile-header,
+            .bottom-nav,
+            .mobile-menu-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-header-left">
+            <span class="mobile-title">Settings</span>
+        </div>
+        <button class="mobile-menu-btn" onclick="openMobileMenu()"><i class="fas fa-bars"></i></button>
+    </header>
 
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -577,6 +833,42 @@ $currentDate = date('l, F j, Y');
         </div>
     </main>
 
+    <!-- Mobile Slide Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenu" onclick="closeMobileMenu(event)">
+        <div class="mobile-menu-panel" onclick="event.stopPropagation()">
+            <div class="mobile-menu-header">
+                <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+                <div class="mobile-menu-user">
+                    <div class="mobile-menu-avatar">
+                        <?php if (!empty($user['profile_pic']) && file_exists(__DIR__ . '/assets/uploads/' . $user['profile_pic'])): ?>
+                            <img src="assets/uploads/<?= htmlspecialchars($user['profile_pic']) ?>" alt="Profile"
+                                style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                        <?php else: ?>
+                            <?= htmlspecialchars($initials) ?>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <div class="mobile-menu-name"><?= htmlspecialchars($student_name) ?></div>
+                        <div class="mobile-menu-email"><?= $totalRentals ?> total rides</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="mobile-menu-nav">
+                <a href="dashboard.php" class="mobile-menu-item"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                <a href="available-bikes.php" class="mobile-menu-item"><i class="fas fa-bicycle"></i> Available
+                    Bikes</a>
+                <a href="rental-summary.php" class="mobile-menu-item"><i class="fas fa-clock-rotate-left"></i> Rental
+                    Summary</a>
+                <a href="complaints.php" class="mobile-menu-item"><i class="fas fa-comment-dots"></i> Complaints</a>
+                <a href="settings.php" class="mobile-menu-item active"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+            <div class="mobile-menu-footer">
+                <button class="mobile-logout-btn" onclick="showLogoutModal()"><i class="fas fa-sign-out-alt"></i> Sign
+                    Out</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Crop Modal -->
     <div class="crop-modal" id="cropModal">
         <div class="crop-modal-box">
@@ -680,23 +972,32 @@ $currentDate = date('l, F j, Y');
         function showLogoutModal() {
             document.getElementById('logoutModal').classList.add('active');
         }
-
         function hideLogoutModal() {
             document.getElementById('logoutModal').classList.remove('active');
         }
-
         function confirmLogout() {
             window.location.href = 'logout.php';
         }
-
         document.getElementById('logoutModal').addEventListener('click', function (e) {
             if (e.target === this) hideLogoutModal();
         });
+
+        // Mobile Menu
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileMenu(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('mobileMenu').classList.remove('active');
+            document.body.style.overflow = '';
+        }
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 hideLogoutModal();
                 closeCropModal();
+                closeMobileMenu();
             }
         });
     </script>
